@@ -24,7 +24,6 @@
 		<asm.version>9.4</asm.version>
 
 		<postgresql.version>42.5.4</postgresql.version>
-		<flyway-core.version>9.21.1</flyway-core.version>
 		<maven-surefire-plugin.version>3.1.2</maven-surefire-plugin.version>
 		<exec-maven-plugin.version>3.1.0</exec-maven-plugin.version>
 	</properties>
@@ -103,15 +102,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.flywaydb</groupId>
-			<artifactId>flyway-core</artifactId>
-			<version>${flyway-core.version}</version>
-			<scope>test</scope>
-		</dependency>
-
-
-
-		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter</artifactId>
 			<scope>test</scope>
@@ -147,11 +137,6 @@
 						<version>${postgresql.version}</version>
 					</dependency>
 
-					<dependency>
-						<groupId>org.flywaydb</groupId>
-						<artifactId>flyway-core</artifactId>
-						<version>${flyway-core.version}</version>
-					</dependency>
 				</dependencies>
 			</plugin>
 

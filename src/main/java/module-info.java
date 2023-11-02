@@ -8,7 +8,7 @@ module gurukulams.questionbank {
 
     opens com.gurukulams.questionbank.service;
     opens com.gurukulams.questionbank.payload;
-    opens db.migration;
+    opens db.upgrades;
 
     exports com.gurukulams.questionbank.service;
     exports com.gurukulams.questionbank.payload;

@@ -19,7 +19,7 @@ class TagServiceTest {
     private final TagService tagService;
 
     TagServiceTest() {
-        this.tagService = new TagService(TestUtil.gurukulamsManager());
+        this.tagService = new TagService(TestUtil.questionBankManager());
     }
 
     /**

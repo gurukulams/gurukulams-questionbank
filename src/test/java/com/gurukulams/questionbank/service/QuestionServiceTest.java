@@ -38,10 +38,10 @@ class QuestionServiceTest {
         ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
 
         Validator validator = validatorFactory.getValidator();
-        CategoryService categoryService = new CategoryService(TestUtil.gurukulamsManager());
+        CategoryService categoryService = new CategoryService(TestUtil.questionBankManager());
         this.questionService = new QuestionService(categoryService,
                 validator,
-                TestUtil.gurukulamsManager());
+                TestUtil.questionBankManager());
         this.answerService = new AnswerService(this.questionService);
     }
 

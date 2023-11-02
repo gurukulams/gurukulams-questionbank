@@ -20,7 +20,7 @@ class CategoryServiceTest {
     private final CategoryService categoryService;
 
     CategoryServiceTest() {
-        this.categoryService = new CategoryService(TestUtil.gurukulamsManager());
+        this.categoryService = new CategoryService(TestUtil.questionBankManager());
     }
 
     /**

@@ -1,8 +1,8 @@
 # Connection Details
 name: "QuestionBank"
 url: "jdbc:postgresql://localhost:5432/gurukulams_questionbank"
-userName: "tom"
-password: "password"
+userName: "questionbank"
+password: "questionbank"
 schemaName: "gurukulams_questionbank"
 
 # Mapping Logic

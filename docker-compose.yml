@@ -6,8 +6,8 @@ services:
     container_name: gurukulams_questionbank
     environment:
       POSTGRES_DB: gurukulams_questionbank
-      POSTGRES_USER: tom
-      POSTGRES_PASSWORD: password
+      POSTGRES_USER: questionbank
+      POSTGRES_PASSWORD: questionbank
     ports:
       - "5432:5432"
     volumes:

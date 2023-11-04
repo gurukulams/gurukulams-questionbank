@@ -6,8 +6,8 @@ public class TestUtil {
     public static QuestionBankManager questionBankManager() {
         PGSimpleDataSource ds = new PGSimpleDataSource() ;
         ds.setURL( "jdbc:postgresql://localhost:5432/gurukulams_questionbank" );
-        ds.setUser( "tom" );
-        ds.setPassword( "password" );
+        ds.setUser( "questionbank" );
+        ds.setPassword( "questionbank" );
         return QuestionBankManager.getManager(ds);
     }
 

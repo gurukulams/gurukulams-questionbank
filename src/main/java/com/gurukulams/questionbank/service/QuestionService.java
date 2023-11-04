@@ -1,7 +1,6 @@
 package com.gurukulams.questionbank.service;
 
 import com.gurukulams.questionbank.QuestionBankManager;
-import com.gurukulams.questionbank.model.Category;
 import com.gurukulams.questionbank.model.QuestionCategory;
 import com.gurukulams.questionbank.model.QuestionChoice;
 import com.gurukulams.questionbank.model.QuestionChoiceLocalized;
@@ -44,12 +43,6 @@ public class QuestionService {
      */
     public static final String OWNER_USER = "tom@email.com";
 
-
-    /**
-     * this helps to practiceService.
-     */
-    private final CategoryService categoryService;
-
     /**
      * Validator.
      */
@@ -91,14 +84,11 @@ public class QuestionService {
     /**
      * initializes.
      *
-     * @param aCategoryService the practiceservice
      * @param aValidator       thevalidator
      * @param gurukulamsManager
      */
-    public QuestionService(final CategoryService aCategoryService,
-                           final Validator aValidator,
+    public QuestionService(final Validator aValidator,
                            final QuestionBankManager gurukulamsManager) {
-        this.categoryService = aCategoryService;
         this.validator = aValidator;
         this.questionStore = gurukulamsManager
                 .getQuestionStore();
@@ -810,29 +800,14 @@ public class QuestionService {
 
         int noOfRowsInserted = 0;
 
-        try {
-            QuestionCategory questionCategory = new QuestionCategory();
-            questionCategory.setQuestionId(questionId);
-            questionCategory.setCategoryId(categoryId);
+        QuestionCategory questionCategory = new QuestionCategory();
+        questionCategory.setQuestionId(questionId);
+        questionCategory.setCategoryId(categoryId);
 
-            noOfRowsInserted = this.questionCategoryStore
-                    .insert()
-                    .values(questionCategory)
-                    .execute();
-        } catch (final SQLException e) {
-            // Retry with Auto Create Category
-
-            Category category = new Category();
-            category.setId(categoryId);
-            category.setTitle(categoryId.toUpperCase());
-
-            if (this.categoryService.create(
-                    userName, null, category) != null) {
-                return attachCategory(userName, questionId, categoryId);
-            }
-        }
-
-        // DataIntegrityViolationException
+        noOfRowsInserted = this.questionCategoryStore
+                .insert()
+                .values(questionCategory)
+                .execute();
 
         return noOfRowsInserted == 1;
     }

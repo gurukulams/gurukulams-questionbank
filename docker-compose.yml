@@ -2,10 +2,10 @@ version: '3.1'
 
 services:
   postgresdb:
-    image: postgres:11
-    container_name: gurukulams_questionbank
+    image: postgres
+    container_name: questionbank
     environment:
-      POSTGRES_DB: gurukulams_questionbank
+      POSTGRES_DB: questionbank
       POSTGRES_USER: questionbank
       POSTGRES_PASSWORD: questionbank
     ports:

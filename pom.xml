@@ -9,8 +9,8 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<properties>
-		<maven.compiler.target>20</maven.compiler.target>
-		<maven.compiler.source>20</maven.compiler.source>
+		<maven.compiler.target>21</maven.compiler.target> <!-- 21 is java version. Replace Current JAVA Version -->
+		<maven.compiler.source>21</maven.compiler.source>
 
 		<junit.version>5.10.0</junit.version>
 		<archunit.version>1.0.1</archunit.version>
@@ -239,5 +239,16 @@
 		</plugins>
 	</build>
 
-
+	 <repositories>
+        <repository>
+            <id>central</id>
+            <url>https://repo.maven.apache.org/maven2</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 </project>

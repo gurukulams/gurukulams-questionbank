@@ -41,7 +41,7 @@ public class QuestionService {
     /**
      * Owner of QB.
      */
-    public static final String OWNER_USER = "tom@email.com";
+    public static final String OWNER_USER = "tom";
 
     /**
      * Validator.

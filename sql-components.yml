@@ -1,9 +1,9 @@
 # Connection Details
 name: "QuestionBank"
-url: "jdbc:postgresql://localhost:5432/gurukulams_questionbank"
+url: "jdbc:postgresql://localhost:5432/questionbank"
 userName: "questionbank"
 password: "questionbank"
-schemaName: "gurukulams_questionbank"
+schemaName: "questionbank"
 
 # Mapping Logic
 rootPackage: "com.gurukulams.questionbank"

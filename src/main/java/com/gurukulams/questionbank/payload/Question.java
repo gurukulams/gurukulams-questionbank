@@ -57,24 +57,20 @@ public class Question {
      * tells the question choices available.
      */
     private List<QuestionChoice> choices;
-
     /**
      *
-     * @return get the matches
+     * @return match
      */
     public List<QuestionChoice> getMatches() {
         return matches;
     }
-
     /**
      *
      * @param matched
      */
-
     public final void setMatches(final List<QuestionChoice> matched) {
         this.matches = matched;
     }
-
     /**
      * tells the match the following available.
      */

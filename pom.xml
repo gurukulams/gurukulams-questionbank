@@ -113,12 +113,6 @@
 			<version>${archunit.version}</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>com.gurukulams</groupId>
-			<artifactId>questionbank</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-
 	</dependencies>
 
 	<build>

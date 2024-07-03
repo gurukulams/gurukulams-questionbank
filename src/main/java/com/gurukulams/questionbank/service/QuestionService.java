@@ -142,12 +142,11 @@ public class QuestionService {
             }
 
             if ((question.getType().equals(QuestionType.CHOOSE_THE_BEST)
-                    || question.getType().equals(QuestionType.MULTI_CHOICE)
-                    || question.getType().equals(QuestionType.MATCH_THE_FOLLOWING)))
-            {
+            || question.getType().equals(QuestionType.MULTI_CHOICE)
+            || question.getType().equals(QuestionType.MATCH_THE_FOLLOWING))) {
                 createChoices(question.getChoices(), locale, id);
             }
-            if (question.getType().equals(QuestionType.MATCH_THE_FOLLOWING)){
+            if (question.getType().equals(QuestionType.MATCH_THE_FOLLOWING)) {
                 createChoices(question.getMatches(), locale, id);
             }
 
@@ -721,7 +720,7 @@ public class QuestionService {
             if (question.getType().equals(QuestionType.MATCH_THE_FOLLOWING)) {
                 List<QuestionChoice> choices = question.getChoices();
                 List<QuestionChoice> matches = question.getMatches();
-                if (choices.size() > matches.size()){
+                if (choices.size() > matches.size()) {
                     ConstraintViolation<Question> violation
                             = ConstraintViolationImpl.forBeanValidation(
                             messageTemplate, messageParameters,

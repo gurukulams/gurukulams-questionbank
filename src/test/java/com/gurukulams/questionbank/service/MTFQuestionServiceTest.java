@@ -17,19 +17,14 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static com.gurukulams.questionbank.service.QuestionService.OWNER_USER;
 
 
 class MTFQuestionServiceTest {
 
-
     private final QuestionService questionService;
-
 
     private final AnswerService answerService;
 
@@ -42,8 +37,7 @@ class MTFQuestionServiceTest {
                 TestUtil.questionBankManager());
         this.answerService = new AnswerService(this.questionService);
     }
-
-
+    
     /**
      * Before.
      *
@@ -71,6 +65,9 @@ class MTFQuestionServiceTest {
         Question question = newMTF();
         Optional<Question> optionalQuestion = null;
         try {
+
+            question.getChoices().add(null);
+
             optionalQuestion = this.questionService.create(List.of("c1",
                             "c2"),
                     null,
@@ -84,9 +81,8 @@ class MTFQuestionServiceTest {
     }
     @Test
     void testCreateValidationEqualToMatch() throws SQLException {
-        Question question = newMTFWithExactMatch();
-        Optional<Question> optionalQuestion = null;
-        optionalQuestion = this.questionService.create(List.of("c1",
+        Question question = newMTF();
+        Optional<Question> optionalQuestion = this.questionService.create(List.of("c1",
                             "c2"),
                     null,
                     QuestionType.MATCH_THE_FOLLOWING,
@@ -94,60 +90,12 @@ class MTFQuestionServiceTest {
                     OWNER_USER,
                     question);
         Assertions.assertTrue(optionalQuestion.isPresent());
-        Assertions.assertNotNull(optionalQuestion.get().getChoices());
-        Assertions.assertNotNull(optionalQuestion.get().getMatches());
+        Assertions.assertEquals(question.getChoices().size(), optionalQuestion.get().getChoices().size());
+        Assertions.assertEquals(question.getMatches().size(), optionalQuestion.get().getMatches().size());
     }
-
 
 
     Question newMTF() {
-        Question question = new Question();
-        question.setQuestion("Match the Following");
-        question.setExplanation("A Match the Following question");
-        question.setChoices(new ArrayList<>());
-
-        QuestionChoice choice = new QuestionChoice();
-        choice.setCValue("Java");
-        question.getChoices().add(choice);
-
-        choice = new QuestionChoice();
-        choice.setCValue("Postgres");
-        question.getChoices().add(choice);
-
-        choice = new QuestionChoice();
-        choice.setCValue("MongoDB");
-        question.getChoices().add(choice);
-
-        choice = new QuestionChoice();
-        choice.setCValue("C");
-        question.getChoices().add(choice);
-
-        question.getChoices().add(null);
-
-
-        question.setMatches(new ArrayList<>());
-
-        choice = new QuestionChoice();
-        choice.setCValue("Object Oriented");
-        question.getMatches().add(choice);
-
-        choice = new QuestionChoice();
-        choice.setCValue("Relational Database");
-        question.getMatches().add(choice);
-
-        choice = new QuestionChoice();
-        choice.setCValue("Document Database");
-        question.getMatches().add(choice);
-
-        choice = new QuestionChoice();
-        choice.setCValue("System Language");
-        question.getMatches().add(choice);
-
-        return question;
-    }
-
-
-    Question newMTFWithExactMatch() {
         Question question = new Question();
         question.setQuestion("Match the Following");
         question.setExplanation("A Match the Following question");

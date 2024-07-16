@@ -144,10 +144,10 @@ public class QuestionService {
             if ((question.getType().equals(QuestionType.CHOOSE_THE_BEST)
             || question.getType().equals(QuestionType.MULTI_CHOICE)
             || question.getType().equals(QuestionType.MATCH_THE_FOLLOWING))) {
-                createChoices(question.getChoices(), locale, id);
+                List<QuestionChoice> createdChoices = createChoices(question.getChoices(), locale, id);
             }
             if (question.getType().equals(QuestionType.MATCH_THE_FOLLOWING)) {
-                createChoices(question.getMatches(), locale, id);
+                List<QuestionChoice> createdMatches =  createChoices(question.getMatches(), locale, id);
             }
 
             for (String category : categories) {
@@ -209,7 +209,7 @@ public class QuestionService {
         return question;
     }
 
-    private void createChoice(final QuestionChoice choice,
+    private QuestionChoice createChoice(final QuestionChoice choice,
                               final Locale locale,
                               final UUID questionId) throws SQLException {
         UUID choiceId = UUID.randomUUID();
@@ -263,7 +263,7 @@ public class QuestionService {
         }
     }
 
-    private void createChoices(final List<QuestionChoice> choices,
+    private List<QuestionChoice> createChoices(final List<QuestionChoice> choices,
                                final Locale locale,
                                final UUID id) throws SQLException {
         if (choices != null) {

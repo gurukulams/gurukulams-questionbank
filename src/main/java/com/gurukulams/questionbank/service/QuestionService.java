@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 /**
@@ -84,7 +85,7 @@ public class QuestionService {
     /**
      * initializes.
      *
-     * @param aValidator       thevalidator
+     * @param aValidator        thevalidator
      * @param gurukulamsManager
      */
     public QuestionService(final Validator aValidator,
@@ -142,17 +143,25 @@ public class QuestionService {
             }
 
             if ((question.getType().equals(QuestionType.CHOOSE_THE_BEST)
-            || question.getType().equals(QuestionType.MULTI_CHOICE)
-            || question.getType().equals(QuestionType.MATCH_THE_FOLLOWING))) {
-                List<QuestionChoice> createdChoices = createChoices(question.getChoices(), locale, id);
+                    || question.getType().equals(QuestionType.MULTI_CHOICE)
+                    || question.getType().equals(
+                            QuestionType.MATCH_THE_FOLLOWING))) {
+                List<QuestionChoice> createdChoices = createChoices(
+                        question.getChoices(), locale, id);
+                System.out.println(
+                        "============ createdChoices" + createdChoices);
             }
             if (question.getType().equals(QuestionType.MATCH_THE_FOLLOWING)) {
-                List<QuestionChoice> createdMatches =  createChoices(question.getMatches(), locale, id);
+                List<QuestionChoice> createdMatches = createChoices(
+                        question.getMatches(), locale, id);
+                System.out.println(
+                        "============ createdMatches" + createdMatches);
+
             }
 
             for (String category : categories) {
                 attachCategory(createdBy,
-                            id, category);
+                        id, category);
             }
 
             return read(id, locale);
@@ -209,9 +218,10 @@ public class QuestionService {
         return question;
     }
 
-    private QuestionChoice createChoice(final QuestionChoice choice,
-                              final Locale locale,
-                              final UUID questionId) throws SQLException {
+    private QuestionChoice createChoice(
+            final QuestionChoice choice,
+            final Locale locale,
+            final UUID questionId) throws SQLException {
         UUID choiceId = UUID.randomUUID();
 
         choice.setId(choiceId);
@@ -227,8 +237,9 @@ public class QuestionService {
             createLocalizedChoice(locale, choice);
         }
 
-
+        return choice;
     }
+
 
     private void createLocalizedChoice(final Locale locale,
                                        final QuestionChoice choice)
@@ -263,14 +274,17 @@ public class QuestionService {
         }
     }
 
-    private List<QuestionChoice> createChoices(final List<QuestionChoice> choices,
-                               final Locale locale,
-                               final UUID id) throws SQLException {
+    private List<QuestionChoice> createChoices(
+            final List<QuestionChoice> choices,
+            final Locale locale,
+            final UUID id) throws SQLException {
+        List<QuestionChoice> createdChoices = new ArrayList<>();
         if (choices != null) {
             for (QuestionChoice choice : choices) {
-                createChoice(choice, locale, id);
+                createdChoices.add(createChoice(choice, locale, id));
             }
         }
+        return createdChoices;
     }
 
     /**

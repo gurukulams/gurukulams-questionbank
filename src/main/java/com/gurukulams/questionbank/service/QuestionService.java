@@ -1,18 +1,10 @@
 package com.gurukulams.questionbank.service;
 
 import com.gurukulams.questionbank.QuestionBankManager;
-import com.gurukulams.questionbank.model.QuestionCategory;
-import com.gurukulams.questionbank.model.QuestionChoice;
-import com.gurukulams.questionbank.model.QuestionChoiceLocalized;
-import com.gurukulams.questionbank.model.QuestionLocalized;
+import com.gurukulams.questionbank.model.*;
 import com.gurukulams.questionbank.payload.Question;
 import com.gurukulams.questionbank.payload.QuestionType;
-import com.gurukulams.questionbank.store.QuestionCategoryStore;
-import com.gurukulams.questionbank.store.QuestionChoiceLocalizedStore;
-import com.gurukulams.questionbank.store.QuestionChoiceStore;
-import com.gurukulams.questionbank.store.QuestionLocalizedStore;
-import com.gurukulams.questionbank.store.QuestionStore;
-import com.gurukulams.questionbank.store.QuestionTagStore;
+import com.gurukulams.questionbank.store.*;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Path;
@@ -20,6 +12,7 @@ import jakarta.validation.Validator;
 import jakarta.validation.metadata.ConstraintDescriptor;
 import org.hibernate.validator.internal.engine.ConstraintViolationImpl;
 
+import javax.xml.transform.Source;
 import java.lang.annotation.ElementType;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -64,6 +57,8 @@ public class QuestionService {
      */
     private final QuestionChoiceStore questionChoiceStore;
 
+    private final MatchesStore MatchesStore;
+
     /**
      * QuestionChoiceLocalized.
      */
@@ -103,6 +98,7 @@ public class QuestionService {
                 .getQuestionCategoryStore();
         this.questionTagStore = gurukulamsManager
                 .getQuestionTagStore();
+        MatchesStore = gurukulamsManager.getMatchesStore();
     }
 
     /**
@@ -141,23 +137,41 @@ public class QuestionService {
 
                 createLocalized(locale, question, id);
             }
-
+            List<QuestionChoice> createdChoices = null;
             if ((question.getType().equals(QuestionType.CHOOSE_THE_BEST)
                     || question.getType().equals(QuestionType.MULTI_CHOICE)
-                    || question.getType().equals(
-                            QuestionType.MATCH_THE_FOLLOWING))) {
-                List<QuestionChoice> createdChoices = createChoices(
-                        question.getChoices(), locale, id);
-                System.out.println(
-                        "============ createdChoices" + createdChoices);
+                    || question.getType().equals(QuestionType.MATCH_THE_FOLLOWING))) {
+                createdChoices = createChoices(question.getChoices(), locale, id);
             }
-            if (question.getType().equals(QuestionType.MATCH_THE_FOLLOWING)) {
-                List<QuestionChoice> createdMatches = createChoices(
-                        question.getMatches(), locale, id);
-                System.out.println(
-                        "============ createdMatches" + createdMatches);
 
+            if (question.getType().equals(QuestionType.MATCH_THE_FOLLOWING)) {
+                List<QuestionChoice> createdMatchChoices = createChoices(question.getMatches(), locale, id);
+
+                List<Matches> matchesToCreate = new ArrayList<>();
+
+                for (int i = 0; i < createdChoices.size() && i < createdMatchChoices.size(); i++) {
+                    QuestionChoice choice = createdChoices.get(i);
+                    QuestionChoice matchChoice = createdMatchChoices.get(i);
+
+                    UUID choiceId = choice.getId();
+                    UUID questionId = choice.getQuestionId();
+                    UUID matchId = matchChoice.getId();
+
+                    System.out.println("\nQuestion ID: " + questionId);
+                    System.out.println("Choice ID: " + choiceId);
+                    System.out.println("Match ID: " + matchId);
+
+                    Matches match = new Matches();
+                    match.setQuestionId(questionId);
+                    match.setChoiceId(choiceId);
+                    match.setMatchId(matchId);
+
+                    matchesToCreate.add(match);
+                }
+
+                List<Matches> createdMatches = createMatches(matchesToCreate);
             }
+
 
             for (String category : categories) {
                 attachCategory(createdBy,
@@ -170,6 +184,8 @@ public class QuestionService {
         }
 
     }
+
+
 
     private int createLocalized(final Locale locale,
                                 final Question question,
@@ -240,6 +256,23 @@ public class QuestionService {
         return choice;
     }
 
+    private Matches createMatch (
+            final UUID questionId,
+            final UUID choiceId,
+            final UUID matchId
+    ) throws SQLException {
+
+        Matches matches = new Matches();
+
+        matches.setQuestionId(questionId);
+        matches.setChoiceId(choiceId);
+        matches.setMatchId(matchId);
+        this.MatchesStore.insert().values(matches)
+                .execute();
+
+        return matches;
+    }
+
 
     private void createLocalizedChoice(final Locale locale,
                                        final QuestionChoice choice)
@@ -286,6 +319,20 @@ public class QuestionService {
         }
         return createdChoices;
     }
+    private List<Matches> createMatches(
+            final List<Matches> matches) throws SQLException {
+        List<Matches> createdMatches = new ArrayList<>();
+
+
+        if (matches != null) {
+            for (Matches match : matches) {
+                createdMatches.add(createMatch(match.getQuestionId(), match.getChoiceId(),match.getMatchId()));
+            }
+        }
+        return createdMatches;
+    }
+
+
 
     /**
      * List question choice list.

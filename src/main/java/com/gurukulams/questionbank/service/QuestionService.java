@@ -152,7 +152,7 @@ public class QuestionService {
                 int choiceSize = choices.size();
 
                 List<QuestionChoice> extraMatch = matches.stream().skip(choiceSize).toList();
-                System.out.println("extra matches: " + extraMatch);
+                System.out.println("extra matches: " + extraMatch.get(0).getId());
 
                 for (int i = 0; i < choiceSize; i++) {
                     QuestionChoice choice = choices.get(i);
@@ -174,11 +174,16 @@ public class QuestionService {
                 }
 
                 if (!extraMatch.isEmpty()) {
-                    for (QuestionChoice extra : extraMatch) {
+                    for (QuestionChoice eMatch : extraMatch) {
+
+                        QuestionChoice choice = new QuestionChoice();
+                        choice.setCValue(null);
+                        choice.setQuestionId(id);
+                        choice = createChoice(choice, locale, id);
                         Matches match = new Matches();
-                        UUID extraMatchId = extra.getId();
+                        UUID extraMatchId = eMatch.getId();
                         match.setQuestionId(id);
-                        match.setChoiceId(null);
+                        match.setChoiceId(choice.getId());
                         match.setMatchId(extraMatchId);
 
                         matchesToCreate.add(match);

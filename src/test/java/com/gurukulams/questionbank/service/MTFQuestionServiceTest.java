@@ -82,18 +82,18 @@ class MTFQuestionServiceTest {
     @Test
     void testCreateValidationEqualToMatch() throws SQLException {
         Question question = newMTF();
-        Optional<Question> optionalQuestion = this.questionService.create(List.of("c1",
-                            "c2"),
-                    null,
-                    QuestionType.MATCH_THE_FOLLOWING,
-                    null,
-                    OWNER_USER,
-                    question);
+        Optional<Question> optionalQuestion = this.questionService.create(
+                List.of("c1", "c2"),
+                null,
+                QuestionType.MATCH_THE_FOLLOWING,
+                null,
+                OWNER_USER,
+                question
+        );
         Assertions.assertTrue(optionalQuestion.isPresent());
         Assertions.assertEquals(question.getChoices().size(), optionalQuestion.get().getChoices().size());
         Assertions.assertEquals(question.getMatches().size(), optionalQuestion.get().getMatches().size());
     }
-
 
     Question newMTF() {
         Question question = new Question();
@@ -117,8 +117,6 @@ class MTFQuestionServiceTest {
         choice.setCValue("C");
         question.getChoices().add(choice);
 
-
-
         question.setMatches(new ArrayList<>());
 
         choice = new QuestionChoice();
@@ -135,6 +133,10 @@ class MTFQuestionServiceTest {
 
         choice = new QuestionChoice();
         choice.setCValue("System Language");
+        question.getMatches().add(choice);
+
+        choice = new QuestionChoice();
+        choice.setCValue("Extra Match");
         question.getMatches().add(choice);
 
         return question;

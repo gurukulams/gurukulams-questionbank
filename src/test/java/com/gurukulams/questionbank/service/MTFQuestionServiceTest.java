@@ -4,14 +4,12 @@ import com.gurukulams.questionbank.model.QuestionChoice;
 import com.gurukulams.questionbank.payload.Question;
 import com.gurukulams.questionbank.payload.QuestionType;
 import com.gurukulams.questionbank.util.TestUtil;
-import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -22,7 +20,6 @@ import java.util.Optional;
 
 import static com.gurukulams.questionbank.service.QuestionService.OWNER_USER;
 
-@Disabled
 class MTFQuestionServiceTest {
 
     private final QuestionService questionService;

@@ -1,11 +1,8 @@
 create table matches (
-    question_id UUID not null,
-    choice_id UUID,
-    match_id UUID not null,
-    primary key (question_id,
-    choice_id,
-    match_id),
+    question_id UUID references question_choice (id) not null,
+    choice_id UUID references question_choice (id),
+    match_id UUID references question_choice (id) not null,
     foreign key (question_id) references question (id),
-    foreign key (choice_id) references question_choice (id),
+    choice_id references question_choice (id),
     foreign key (match_id) references question_choice (id)
 );

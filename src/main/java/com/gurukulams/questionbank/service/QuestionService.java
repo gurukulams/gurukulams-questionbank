@@ -37,6 +37,8 @@ import java.util.UUID;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
+import static com.gurukulams.questionbank.store.MatchesStore.questionId;
+
 /**
  * The type Question service.
  */
@@ -176,10 +178,6 @@ public class QuestionService {
                     UUID choiceId = choice.getId();
                     UUID matchId = matchChoice.getId();
 
-                    System.out.println("\nQuestion ID: " + id);
-                    System.out.println("Choice ID: " + choiceId);
-                    System.out.println("Match ID: " + matchId);
-
                     Matches match = new Matches();
                     match.setQuestionId(id);
                     match.setChoiceId(choiceId);
@@ -191,14 +189,9 @@ public class QuestionService {
                 if (!extraMatch.isEmpty()) {
                     for (QuestionChoice eMatch : extraMatch) {
 
-                        QuestionChoice choice = new QuestionChoice();
-                        choice.setCValue(null);
-                        choice.setQuestionId(id);
-                        choice = createChoice(choice, locale, id);
                         Matches match = new Matches();
                         UUID extraMatchId = eMatch.getId();
                         match.setQuestionId(id);
-                        match.setChoiceId(choice.getId());
                         match.setMatchId(extraMatchId);
 
                         matchesToCreate.add(match);
@@ -274,6 +267,10 @@ public class QuestionService {
             final QuestionChoice choice,
             final Locale locale,
             final UUID questionId) throws SQLException {
+
+        if (choice == null) {
+            return null;
+        }
         UUID choiceId = UUID.randomUUID();
 
         choice.setId(choiceId);
@@ -473,15 +470,58 @@ public class QuestionService {
 
         if (qm.isPresent()) {
             Optional<Question> question = qm.map(this::getQuestion);
-            if ((question.get().getType()
+            if (question.get().getType()
                     .equals(QuestionType.CHOOSE_THE_BEST)
                     || question.get().getType()
-                    .equals(QuestionType.MULTI_CHOICE)
-                    || question.get().getType()
-                    .equals(QuestionType.MATCH_THE_FOLLOWING))) {
+                    .equals(QuestionType.MULTI_CHOICE)) {
                 question.get().setChoices(
                         listChoices(true,
                                 question.get().getId(), locale));
+            } else if (question.get().getType()
+                    .equals(QuestionType.MATCH_THE_FOLLOWING)) {
+                // All Choices are available
+                List<QuestionChoice> allChoices = listChoices(true,
+                        question.get().getId(), locale);
+                // Match Pairs are available
+                List<Matches>  matchePairs =
+                        this.matchesStore.select(questionId().eq(question
+                                .get().getId())).execute();
+
+
+                List<QuestionChoice> choices = new ArrayList<>();
+                List<QuestionChoice> matches = new ArrayList<>();
+
+                matchePairs.stream().filter(matchPair ->
+                        matchPair.getChoiceId() != null).forEach(matchPair -> {
+                    choices.add(allChoices.stream()
+                            .filter(chice -> chice.getId()
+                                    .equals(matchPair.getChoiceId()))
+                            .findFirst()
+                            .get());
+
+                    matches.add(allChoices.stream()
+                            .filter(chice -> chice.getId()
+                                    .equals(matchPair.getMatchId()))
+                            .findFirst().get());
+
+
+                });
+
+                matchePairs.stream().filter(matchPair
+                        -> matchPair.getChoiceId() == null)
+                        .forEach(matchPair -> {
+                    matches.add(allChoices.stream()
+                            .filter(chice -> chice.getId()
+                                    .equals(matchPair.getMatchId()))
+                            .findFirst().get());
+                });
+
+                question.get().setChoices(choices);
+                question.get().setMatches(matches);
+
+
+
+
             }
             return question;
         }

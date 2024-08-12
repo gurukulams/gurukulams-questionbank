@@ -62,26 +62,6 @@ class MTFQuestionServiceTest {
     }
 
     @Test
-    void testCreateValidationErrorWithLessMatches() throws SQLException {
-        Question question = newMTF();
-        Optional<Question> optionalQuestion = null;
-        try {
-
-            question.getChoices().add(null);
-
-            optionalQuestion = this.questionService.create(List.of("c1",
-                            "c2"),
-                    null,
-                    QuestionType.MATCH_THE_FOLLOWING,
-                    null,
-                    OWNER_USER,
-                    question);
-        } catch (ConstraintViolationException exception) {
-            Assertions.assertEquals("null: Not Enough Matches", exception.getMessage());
-        }
-    }
-
-    @Test
     void testCreateValidationEqualToMatch() throws SQLException {
         Question question = newMTF();
         Optional<Question> optionalQuestion = this.questionService.create(

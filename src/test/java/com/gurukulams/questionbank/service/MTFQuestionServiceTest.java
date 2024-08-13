@@ -4,6 +4,7 @@ import com.gurukulams.questionbank.model.QuestionChoice;
 import com.gurukulams.questionbank.payload.Question;
 import com.gurukulams.questionbank.payload.QuestionType;
 import com.gurukulams.questionbank.util.TestUtil;
+import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
@@ -70,27 +71,29 @@ class MTFQuestionServiceTest {
         Assertions.assertTrue(optionalQuestion.isPresent());
         Assertions.assertEquals(question.getChoices().size(), optionalQuestion.get().getChoices().size());
         Assertions.assertEquals(question.getMatches().size(), optionalQuestion.get().getMatches().size());
+        Assertions.assertEquals(optionalQuestion.get().getMatches().size(), optionalQuestion.get().getChoices().size()+1);
         int i=0;
-        for(QuestionChoice choice:question.getChoices()) {
-            if("Java".equals(choice.getCValue())) {
-                Assertions.assertEquals("Object Oriented", optionalQuestion.get().getMatches().get(i).getCValue());
-            } else if("Postgres".equals(choice.getCValue())) {
-                Assertions.assertEquals("Relational Database", optionalQuestion.get().getMatches().get(i).getCValue());
-            } else if("MongoDB".equals(choice.getCValue())) {
-                Assertions.assertEquals("Document Database", optionalQuestion.get().getMatches().get(i).getCValue());
-            } else if("C".equals(choice.getCValue())) {
-                Assertions.assertEquals("System Language", optionalQuestion.get().getMatches().get(i).getCValue());
-            } else if(choice.getCValue() == null) {
-                Assertions.assertEquals("Extra Match", optionalQuestion.get().getMatches().get(i).getCValue());
+        for(QuestionChoice match:optionalQuestion.get().getMatches()) {
+            if ("Object Oriented".equals(match.getCValue())) {
+                Assertions.assertEquals("Java", optionalQuestion.get().getChoices().get(i).getCValue());
+            } else if ("Relational Database".equals(match.getCValue())) {
+                Assertions.assertEquals("Postgres", optionalQuestion.get().getChoices().get(i).getCValue());
+            } else if ("Document Database".equals(match.getCValue())) {
+                Assertions.assertEquals("MongoDB", optionalQuestion.get().getChoices().get(i).getCValue());
+            } else if ("System Language".equals(match.getCValue())) {
+                Assertions.assertEquals("C", optionalQuestion.get().getChoices().get(i).getCValue());
+            } else if ("Extra Match".equals(match.getCValue())) {
+                Assertions.assertTrue(true); //no choice will be there
+            } else {
+                Assertions.fail();
             }
             i++;
         }
     }
 
     @Test
-    @Disabled
     void testCreateWtihExactMatch() throws SQLException {
-        Question question = newMTFWithExtraMatch();
+        Question question = getQuestionExactMatches();
         Optional<Question> optionalQuestion = this.questionService.create(
                 List.of("Computer Science", "Programming"),
                 null,
@@ -102,25 +105,44 @@ class MTFQuestionServiceTest {
         Assertions.assertTrue(optionalQuestion.isPresent());
         Assertions.assertEquals(question.getChoices().size(), optionalQuestion.get().getChoices().size());
         Assertions.assertEquals(question.getMatches().size(), optionalQuestion.get().getMatches().size());
-        Assertions.fail();
+        Assertions.assertEquals(optionalQuestion.get().getMatches().size(), optionalQuestion.get().getChoices().size());
+
+        int i=0;
+        for(QuestionChoice match:optionalQuestion.get().getMatches()) {
+            if ("Object Oriented".equals(match.getCValue())) {
+                Assertions.assertEquals("Java", optionalQuestion.get().getChoices().get(i).getCValue());
+            } else if ("Relational Database".equals(match.getCValue())) {
+                Assertions.assertEquals("Postgres", optionalQuestion.get().getChoices().get(i).getCValue());
+            } else if ("Document Database".equals(match.getCValue())) {
+                Assertions.assertEquals("MongoDB", optionalQuestion.get().getChoices().get(i).getCValue());
+            } else if ("System Language".equals(match.getCValue())) {
+                Assertions.assertEquals("C", optionalQuestion.get().getChoices().get(i).getCValue());
+            } else {
+                Assertions.fail();
+            }
+            i++;
+        }
     }
 
     @Test
-    @Disabled
     void testCreateWtihEmptyMatch() throws SQLException {
-        Question question = newMTFWithExtraMatch();
-        Optional<Question> optionalQuestion = this.questionService.create(
-                List.of("Computer Science", "Programming"),
-                null,
-                QuestionType.MATCH_THE_FOLLOWING,
-                null,
-                OWNER_USER,
-                question
-        );
-        Assertions.assertTrue(optionalQuestion.isPresent());
-        Assertions.assertEquals(question.getChoices().size(), optionalQuestion.get().getChoices().size());
-        Assertions.assertEquals(question.getMatches().size(), optionalQuestion.get().getMatches().size());
-        Assertions.fail();
+        Question question = getQuestionExactMatches();
+        question.setChoices(new ArrayList<>());
+        question.setMatches(new ArrayList<>());
+        try {
+
+            Optional<Question> optionalQuestion = this.questionService.create(
+                    List.of("Computer Science", "Programming"),
+                    null,
+                    QuestionType.MATCH_THE_FOLLOWING,
+                    null,
+                    OWNER_USER,
+                    question
+            );
+            Assertions.fail();
+        } catch (ConstraintViolationException violationException) {
+            Assertions.assertTrue(violationException.getMessage().contains("No choices are provided"));
+        }
     }
 
     @Test

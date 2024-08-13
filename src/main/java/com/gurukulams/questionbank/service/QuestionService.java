@@ -858,6 +858,28 @@ public class QuestionService {
             if (question.getType().equals(QuestionType.MATCH_THE_FOLLOWING)) {
                 List<QuestionChoice> choices = question.getChoices();
                 List<QuestionChoice> matches = question.getMatches();
+                if (choices == null || choices.isEmpty()) {
+                    ConstraintViolation<Question> violation
+                            = ConstraintViolationImpl.forBeanValidation(
+                            messageTemplate, messageParameters,
+                            expressionVariables,
+                            "No choices are provided",
+                            rootBeanClass,
+                            question, leafBeanInstance, cValue, propertyPath,
+                            constraintDescriptor, elementType);
+                    violations.add(violation);
+                }
+                if (matches == null || matches.isEmpty()) {
+                    ConstraintViolation<Question> violation
+                            = ConstraintViolationImpl.forBeanValidation(
+                            messageTemplate, messageParameters,
+                            expressionVariables,
+                            "No Matches are provided",
+                            rootBeanClass,
+                            question, leafBeanInstance, cValue, propertyPath,
+                            constraintDescriptor, elementType);
+                    violations.add(violation);
+                }
                 if (choices.size() > matches.size()) {
                     ConstraintViolation<Question> violation
                             = ConstraintViolationImpl.forBeanValidation(

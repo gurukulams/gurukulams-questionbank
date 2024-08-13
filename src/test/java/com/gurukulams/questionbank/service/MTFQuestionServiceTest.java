@@ -345,6 +345,108 @@ class MTFQuestionServiceTest {
         Assertions.fail();
     }
 
+    @Test
+    @Disabled
+    void testReadQuestionWithValidQuestionId() throws SQLException {
+
+        Question question = newMTFWithExtraMatch();
+        UUID questionId = new UUID(1234567890,6542310);
+        Optional<Question> optionalQuestion = this.questionService.update(
+                QuestionType.MATCH_THE_FOLLOWING,
+                questionId,
+                null,
+                question
+        );
+        Assertions.assertTrue(optionalQuestion.isPresent());
+        Assertions.assertEquals(question.getChoices().size(), optionalQuestion.get().getChoices().size());
+        Assertions.assertEquals(question.getMatches().size(), optionalQuestion.get().getMatches().size());
+        Assertions.fail();
+    }
+
+    @Test
+    @Disabled
+    void testReadQuestionWithInValidQuestionId() throws SQLException {
+        Question question = newMTFWithExtraMatch();
+        UUID questionId = new UUID(1234567890,6542310);
+        Optional<Question> optionalQuestion = this.questionService.update(
+                QuestionType.MATCH_THE_FOLLOWING,
+                questionId,
+                null,
+                question
+        );
+        Assertions.assertTrue(optionalQuestion.isPresent());
+        Assertions.assertEquals(question.getChoices().size(), optionalQuestion.get().getChoices().size());
+        Assertions.assertEquals(question.getMatches().size(), optionalQuestion.get().getMatches().size());
+        Assertions.fail();
+    }
+
+    @Test
+    @Disabled
+    void testListQuestionByType() throws SQLException {
+        Question question = newMTFWithExtraMatch();
+        UUID questionId = new UUID(1234567890,6542310);
+        Optional<Question> optionalQuestion = this.questionService.update(
+                QuestionType.MATCH_THE_FOLLOWING,
+                questionId,
+                null,
+                question
+        );
+        Assertions.assertTrue(optionalQuestion.isPresent());
+        Assertions.assertEquals(question.getChoices().size(), optionalQuestion.get().getChoices().size());
+        Assertions.assertEquals(question.getMatches().size(), optionalQuestion.get().getMatches().size());
+        Assertions.fail();
+    }
+
+    @Test
+    @Disabled
+    void testListQuestionByQuestion() throws SQLException {
+        Question question = newMTFWithExtraMatch();
+        UUID questionId = new UUID(1234567890,6542310);
+        Optional<Question> optionalQuestion = this.questionService.update(
+                QuestionType.MATCH_THE_FOLLOWING,
+                questionId,
+                null,
+                question
+        );
+        Assertions.assertTrue(optionalQuestion.isPresent());
+        Assertions.assertEquals(question.getChoices().size(), optionalQuestion.get().getChoices().size());
+        Assertions.assertEquals(question.getMatches().size(), optionalQuestion.get().getMatches().size());
+        Assertions.fail();
+    }
+
+    @Test
+    @Disabled
+    void testDeleteQuestionById() throws SQLException {
+        Question question = newMTFWithExtraMatch();
+        UUID questionId = new UUID(1234567890,6542310);
+        Optional<Question> optionalQuestion = this.questionService.update(
+                QuestionType.MATCH_THE_FOLLOWING,
+                questionId,
+                null,
+                question
+        );
+        Assertions.assertTrue(optionalQuestion.isPresent());
+        Assertions.assertEquals(question.getChoices().size(), optionalQuestion.get().getChoices().size());
+        Assertions.assertEquals(question.getMatches().size(), optionalQuestion.get().getMatches().size());
+        Assertions.fail();
+    }
+
+    @Test
+    @Disabled
+    void testDeleteQuestionByType() throws SQLException {
+        Question question = newMTFWithExtraMatch();
+        UUID questionId = new UUID(1234567890,6542310);
+        Optional<Question> optionalQuestion = this.questionService.update(
+                QuestionType.MATCH_THE_FOLLOWING,
+                questionId,
+                null,
+                question
+        );
+        Assertions.assertTrue(optionalQuestion.isPresent());
+        Assertions.assertEquals(question.getChoices().size(), optionalQuestion.get().getChoices().size());
+        Assertions.assertEquals(question.getMatches().size(), optionalQuestion.get().getMatches().size());
+        Assertions.fail();
+    }
 
     Question newMTFWithExtraMatch() {
         Question question = getQuestionExactMatches();

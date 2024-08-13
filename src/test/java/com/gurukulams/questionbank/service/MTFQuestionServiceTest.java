@@ -127,7 +127,6 @@ class MTFQuestionServiceTest {
     @Test
     void testCreateWtihEmptyMatch() throws SQLException {
         Question question = getQuestionExactMatches();
-        question.setChoices(new ArrayList<>());
         question.setMatches(new ArrayList<>());
         try {
 
@@ -141,44 +140,48 @@ class MTFQuestionServiceTest {
             );
             Assertions.fail();
         } catch (ConstraintViolationException violationException) {
+            Assertions.assertTrue(violationException.getMessage().contains("No matches are provided"));
+        }
+    }
+
+    @Test
+    void testCreateWtihEmptyChoice() throws SQLException {
+        Question question = getQuestionExactMatches();
+        question.setChoices(new ArrayList<>());
+        try {
+
+            Optional<Question> optionalQuestion = this.questionService.create(
+                List.of("Computer Science", "Programming"),
+                null,
+                QuestionType.MATCH_THE_FOLLOWING,
+                null,
+                OWNER_USER,
+                question
+            );
+            Assertions.fail();
+        } catch (ConstraintViolationException violationException) {
             Assertions.assertTrue(violationException.getMessage().contains("No choices are provided"));
         }
     }
 
     @Test
-    @Disabled
-    void testCreateWtihEmptyChoice() throws SQLException {
-        Question question = newMTFWithExtraMatch();
-        Optional<Question> optionalQuestion = this.questionService.create(
-                List.of("Computer Science", "Programming"),
-                null,
-                QuestionType.MATCH_THE_FOLLOWING,
-                null,
-                OWNER_USER,
-                question
-        );
-        Assertions.assertTrue(optionalQuestion.isPresent());
-        Assertions.assertEquals(question.getChoices().size(), optionalQuestion.get().getChoices().size());
-        Assertions.assertEquals(question.getMatches().size(), optionalQuestion.get().getMatches().size());
-        Assertions.fail();
-    }
-
-    @Test
-    @Disabled
     void testCreateWtihExtraChoices() throws SQLException {
-        Question question = newMTFWithExtraMatch();
-        Optional<Question> optionalQuestion = this.questionService.create(
-                List.of("Computer Science", "Programming"),
-                null,
-                QuestionType.MATCH_THE_FOLLOWING,
-                null,
-                OWNER_USER,
-                question
-        );
-        Assertions.assertTrue(optionalQuestion.isPresent());
-        Assertions.assertEquals(question.getChoices().size(), optionalQuestion.get().getChoices().size());
-        Assertions.assertEquals(question.getMatches().size(), optionalQuestion.get().getMatches().size());
-        Assertions.fail();
+        Question question = getQuestionExactMatches();
+        question.getMatches().remove(2);
+        try {
+
+            Optional<Question> optionalQuestion = this.questionService.create(
+                    List.of("Computer Science", "Programming"),
+                    null,
+                    QuestionType.MATCH_THE_FOLLOWING,
+                    null,
+                    OWNER_USER,
+                    question
+            );
+            Assertions.fail();
+        } catch (ConstraintViolationException violationException) {
+            Assertions.assertTrue(violationException.getMessage().contains("Not Enough Matches"));
+        }
     }
 
     @Test

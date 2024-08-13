@@ -57,11 +57,29 @@ public class Question {
      * tells the question choices available.
      */
     private List<QuestionChoice> choices;
+    /**
+     *
+     * @return match
+     */
+    public List<QuestionChoice> getMatches() {
+        return matches;
+    }
+    /**
+     *
+     * @param matched
+     */
+    public final void setMatches(final List<QuestionChoice> matched) {
+        this.matches = matched;
+    }
+    /**
+     * tells the match the following available.
+     */
+    private List<QuestionChoice> matches;
 
     /**
      * gets the type of question.
      *
-     * @return type type
+     * @return type
      */
     public QuestionType getType() {
         return type;
@@ -70,7 +88,7 @@ public class Question {
     /***
      * sets the type of question.
      *
-     * @param aType the a type
+     * @param aType the type
      */
     public void setType(final QuestionType aType) {
         this.type = aType;
@@ -88,7 +106,7 @@ public class Question {
     /**
      * sets the id of question.
      *
-     * @param anId the an id
+     * @param anId the id
      */
     public void setId(final UUID anId) {
         this.id = anId;
@@ -97,7 +115,7 @@ public class Question {
     /**
      * gets the question.
      *
-     * @return question question
+     * @return question
      */
     public String getQuestion() {
         return question;
@@ -106,7 +124,7 @@ public class Question {
     /**
      * sets the question.
      *
-     * @param anQuestion the an question
+     * @param anQuestion the question
      */
     public void setQuestion(final String anQuestion) {
         this.question = anQuestion;
@@ -133,7 +151,7 @@ public class Question {
     /**
      * gets the answer.
      *
-     * @return answer answer
+     * @return answer
      */
     public String getAnswer() {
         return answer;
@@ -142,7 +160,7 @@ public class Question {
     /**
      * sets the answer.
      *
-     * @param anAnswer the an answer
+     * @param anAnswer the answer
      */
     public void setAnswer(final String anAnswer) {
         this.answer = anAnswer;
@@ -178,7 +196,7 @@ public class Question {
     /**
      * Sets created_by of the question.
      *
-     * @param theOwner the the created_by
+     * @param theOwner the created_by
      */
     public void setCreatedBy(final String theOwner) {
         this.createdBy = theOwner;

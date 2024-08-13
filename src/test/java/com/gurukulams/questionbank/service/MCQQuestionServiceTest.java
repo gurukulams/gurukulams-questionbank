@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 
 
 
-class QuestionServiceTest {
+class MCQQuestionServiceTest {
 
     
     private final QuestionService questionService;
@@ -34,7 +34,7 @@ class QuestionServiceTest {
     
     private final AnswerService answerService;
 
-    QuestionServiceTest() {
+    MCQQuestionServiceTest() {
         ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
 
         Validator validator = validatorFactory.getValidator();

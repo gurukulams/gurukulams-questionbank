@@ -27,5 +27,9 @@ public enum QuestionType {
     /**
      * Single Line.
      **/
+    MATCH_THE_FOLLOWING,
+    /**
+     * Single Line.
+     **/
     CODE_JAVA;
 }

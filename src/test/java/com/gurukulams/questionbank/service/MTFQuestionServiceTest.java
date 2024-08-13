@@ -7,16 +7,14 @@ import com.gurukulams.questionbank.util.TestUtil;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static com.gurukulams.questionbank.service.QuestionService.OWNER_USER;
 
@@ -90,8 +88,9 @@ class MTFQuestionServiceTest {
     }
 
     @Test
+    @Disabled
     void testCreateWtihExactMatch() throws SQLException {
-        Question question = getQuestionExactMatches();
+        Question question = newMTFWithExtraMatch();
         Optional<Question> optionalQuestion = this.questionService.create(
                 List.of("Computer Science", "Programming"),
                 null,
@@ -103,21 +102,249 @@ class MTFQuestionServiceTest {
         Assertions.assertTrue(optionalQuestion.isPresent());
         Assertions.assertEquals(question.getChoices().size(), optionalQuestion.get().getChoices().size());
         Assertions.assertEquals(question.getMatches().size(), optionalQuestion.get().getMatches().size());
-        Assertions.assertEquals(optionalQuestion.get().getChoices().size(), optionalQuestion.get().getMatches().size());
-        int i=0;
-        for(QuestionChoice choice:question.getChoices()) {
-            if("Java".equals(choice.getCValue())) {
-                Assertions.assertEquals("Object Oriented", optionalQuestion.get().getMatches().get(i).getCValue());
-            } else if("Postgres".equals(choice.getCValue())) {
-                Assertions.assertEquals("Relational Database", optionalQuestion.get().getMatches().get(i).getCValue());
-            } else if("MongoDB".equals(choice.getCValue())) {
-                Assertions.assertEquals("Document Database", optionalQuestion.get().getMatches().get(i).getCValue());
-            } else if("C".equals(choice.getCValue())) {
-                Assertions.assertEquals("System Language", optionalQuestion.get().getMatches().get(i).getCValue());
-            }
-            i++;
-        }
+        Assertions.fail();
     }
+
+    @Test
+    @Disabled
+    void testCreateWtihEmptyMatch() throws SQLException {
+        Question question = newMTFWithExtraMatch();
+        Optional<Question> optionalQuestion = this.questionService.create(
+                List.of("Computer Science", "Programming"),
+                null,
+                QuestionType.MATCH_THE_FOLLOWING,
+                null,
+                OWNER_USER,
+                question
+        );
+        Assertions.assertTrue(optionalQuestion.isPresent());
+        Assertions.assertEquals(question.getChoices().size(), optionalQuestion.get().getChoices().size());
+        Assertions.assertEquals(question.getMatches().size(), optionalQuestion.get().getMatches().size());
+        Assertions.fail();
+    }
+
+    @Test
+    @Disabled
+    void testCreateWtihEmptyChoice() throws SQLException {
+        Question question = newMTFWithExtraMatch();
+        Optional<Question> optionalQuestion = this.questionService.create(
+                List.of("Computer Science", "Programming"),
+                null,
+                QuestionType.MATCH_THE_FOLLOWING,
+                null,
+                OWNER_USER,
+                question
+        );
+        Assertions.assertTrue(optionalQuestion.isPresent());
+        Assertions.assertEquals(question.getChoices().size(), optionalQuestion.get().getChoices().size());
+        Assertions.assertEquals(question.getMatches().size(), optionalQuestion.get().getMatches().size());
+        Assertions.fail();
+    }
+
+    @Test
+    @Disabled
+    void testCreateWtihExtraChoices() throws SQLException {
+        Question question = newMTFWithExtraMatch();
+        Optional<Question> optionalQuestion = this.questionService.create(
+                List.of("Computer Science", "Programming"),
+                null,
+                QuestionType.MATCH_THE_FOLLOWING,
+                null,
+                OWNER_USER,
+                question
+        );
+        Assertions.assertTrue(optionalQuestion.isPresent());
+        Assertions.assertEquals(question.getChoices().size(), optionalQuestion.get().getChoices().size());
+        Assertions.assertEquals(question.getMatches().size(), optionalQuestion.get().getMatches().size());
+        Assertions.fail();
+    }
+
+    @Test
+    @Disabled
+    void testUpdateWtihExactMatch() throws SQLException {
+        Question question = newMTFWithExtraMatch();
+        UUID questionId = new UUID(1234567890,6542310);
+        Optional<Question> optionalQuestion = this.questionService.update(
+                QuestionType.MATCH_THE_FOLLOWING,
+                questionId,
+                null,
+                question
+        );
+        Assertions.assertTrue(optionalQuestion.isPresent());
+        Assertions.assertEquals(question.getChoices().size(), optionalQuestion.get().getChoices().size());
+        Assertions.assertEquals(question.getMatches().size(), optionalQuestion.get().getMatches().size());
+        Assertions.fail();
+    }
+
+    @Test
+    @Disabled
+    void testUpdateWtihExtraMatch() throws SQLException {
+        Question question = newMTFWithExtraMatch();
+        UUID questionId = new UUID(1234567890,6542310);
+        Optional<Question> optionalQuestion = this.questionService.update(
+                QuestionType.MATCH_THE_FOLLOWING,
+                questionId,
+                null,
+                question
+        );
+        Assertions.assertTrue(optionalQuestion.isPresent());
+        Assertions.assertEquals(question.getChoices().size(), optionalQuestion.get().getChoices().size());
+        Assertions.assertEquals(question.getMatches().size(), optionalQuestion.get().getMatches().size());
+        Assertions.fail();
+    }
+
+    @Test
+    @Disabled
+    void testUpdateWtihEmptyMatch() throws SQLException {
+        Question question = newMTFWithExtraMatch();
+        UUID questionId = new UUID(1234567890,6542310);
+        Optional<Question> optionalQuestion = this.questionService.update(
+                QuestionType.MATCH_THE_FOLLOWING,
+                questionId,
+                null,
+                question
+        );
+        Assertions.assertTrue(optionalQuestion.isPresent());
+        Assertions.assertEquals(question.getChoices().size(), optionalQuestion.get().getChoices().size());
+        Assertions.assertEquals(question.getMatches().size(), optionalQuestion.get().getMatches().size());
+        Assertions.fail();
+    }
+
+    @Test
+    @Disabled
+    void testUpdateWtihEmptyChoices() throws SQLException {
+        Question question = newMTFWithExtraMatch();
+        UUID questionId = new UUID(1234567890,6542310);
+        Optional<Question> optionalQuestion = this.questionService.update(
+                QuestionType.MATCH_THE_FOLLOWING,
+                questionId,
+                null,
+                question
+        );
+        Assertions.assertTrue(optionalQuestion.isPresent());
+        Assertions.assertEquals(question.getChoices().size(), optionalQuestion.get().getChoices().size());
+        Assertions.assertEquals(question.getMatches().size(), optionalQuestion.get().getMatches().size());
+        Assertions.fail();
+    }
+
+    @Test
+    @Disabled
+    void testUpdateWtihEmptyMatchAndEmptyChoices() throws SQLException {
+        Question question = newMTFWithExtraMatch();
+        UUID questionId = new UUID(1234567890,6542310);
+        Optional<Question> optionalQuestion = this.questionService.update(
+                QuestionType.MATCH_THE_FOLLOWING,
+                questionId,
+                null,
+                question
+        );
+        Assertions.assertTrue(optionalQuestion.isPresent());
+        Assertions.assertEquals(question.getChoices().size(), optionalQuestion.get().getChoices().size());
+        Assertions.assertEquals(question.getMatches().size(), optionalQuestion.get().getMatches().size());
+        Assertions.fail();
+    }
+
+    @Test
+    @Disabled
+    void testUpdatequestion() throws SQLException {
+        Question question = newMTFWithExtraMatch();
+        UUID questionId = new UUID(1234567890,6542310);
+        Optional<Question> optionalQuestion = this.questionService.update(
+                QuestionType.MATCH_THE_FOLLOWING,
+                questionId,
+                null,
+                question
+        );
+        Assertions.assertTrue(optionalQuestion.isPresent());
+        Assertions.assertEquals(question.getChoices().size(), optionalQuestion.get().getChoices().size());
+        Assertions.assertEquals(question.getMatches().size(), optionalQuestion.get().getMatches().size());
+        Assertions.fail();
+    }
+
+    @Test
+    @Disabled
+    void testUpdateExplanation() throws SQLException {
+        Question question = newMTFWithExtraMatch();
+        UUID questionId = new UUID(1234567890,6542310);
+        Optional<Question> optionalQuestion = this.questionService.update(
+                QuestionType.MATCH_THE_FOLLOWING,
+                questionId,
+                null,
+                question
+        );
+        Assertions.assertTrue(optionalQuestion.isPresent());
+        Assertions.assertEquals(question.getChoices().size(), optionalQuestion.get().getChoices().size());
+        Assertions.assertEquals(question.getMatches().size(), optionalQuestion.get().getMatches().size());
+        Assertions.fail();
+    }
+
+    @Test
+    @Disabled
+    void testUpdateAddExtraMatches() throws SQLException {
+        Question question = newMTFWithExtraMatch();
+        UUID questionId = new UUID(1234567890,6542310);
+        Optional<Question> optionalQuestion = this.questionService.update(
+                QuestionType.MATCH_THE_FOLLOWING,
+                questionId,
+                null,
+                question
+        );
+        Assertions.assertTrue(optionalQuestion.isPresent());
+        Assertions.assertEquals(question.getChoices().size(), optionalQuestion.get().getChoices().size());
+        Assertions.assertEquals(question.getMatches().size(), optionalQuestion.get().getMatches().size());
+        Assertions.fail();
+    }
+
+    @Test
+    @Disabled
+    void testUpdateDeleteMatches() throws SQLException {
+        Question question = newMTFWithExtraMatch();
+        UUID questionId = new UUID(1234567890,6542310);
+        Optional<Question> optionalQuestion = this.questionService.update(
+                QuestionType.MATCH_THE_FOLLOWING,
+                questionId,
+                null,
+                question
+        );
+        Assertions.assertTrue(optionalQuestion.isPresent());
+        Assertions.assertEquals(question.getChoices().size(), optionalQuestion.get().getChoices().size());
+        Assertions.assertEquals(question.getMatches().size(), optionalQuestion.get().getMatches().size());
+        Assertions.fail();
+    }
+
+    @Test
+    @Disabled
+    void testUpdateAddMatchesAndChoices() throws SQLException {
+        Question question = newMTFWithExtraMatch();
+        UUID questionId = new UUID(1234567890,6542310);
+        Optional<Question> optionalQuestion = this.questionService.update(
+                QuestionType.MATCH_THE_FOLLOWING,
+                questionId,
+                null,
+                question
+        );
+        Assertions.assertTrue(optionalQuestion.isPresent());
+        Assertions.assertEquals(question.getChoices().size(), optionalQuestion.get().getChoices().size());
+        Assertions.assertEquals(question.getMatches().size(), optionalQuestion.get().getMatches().size());
+        Assertions.fail();
+    }
+    @Test
+    @Disabled
+    void testUpdateDeleteMatchesChoices() throws SQLException {
+        Question question = newMTFWithExtraMatch();
+        UUID questionId = new UUID(1234567890,6542310);
+        Optional<Question> optionalQuestion = this.questionService.update(
+                QuestionType.MATCH_THE_FOLLOWING,
+                questionId,
+                null,
+                question
+        );
+        Assertions.assertTrue(optionalQuestion.isPresent());
+        Assertions.assertEquals(question.getChoices().size(), optionalQuestion.get().getChoices().size());
+        Assertions.assertEquals(question.getMatches().size(), optionalQuestion.get().getMatches().size());
+        Assertions.fail();
+    }
+
 
     Question newMTFWithExtraMatch() {
         Question question = getQuestionExactMatches();

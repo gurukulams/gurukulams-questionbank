@@ -470,63 +470,69 @@ public class QuestionService {
 
         if (qm.isPresent()) {
             Optional<Question> question = qm.map(this::getQuestion);
-            if (question.get().getType()
-                    .equals(QuestionType.CHOOSE_THE_BEST)
-                    || question.get().getType()
-                    .equals(QuestionType.MULTI_CHOICE)) {
-                question.get().setChoices(
-                        listChoices(true,
-                                question.get().getId(), locale));
-            } else if (question.get().getType()
-                    .equals(QuestionType.MATCH_THE_FOLLOWING)) {
-                // All Choices are available
-                List<QuestionChoice> allChoices = listChoices(true,
-                        question.get().getId(), locale);
-                // Match Pairs are available
-                List<Matches>  matchePairs =
-                        this.matchesStore.select(questionId().eq(question
-                                .get().getId())).execute();
-
-
-                List<QuestionChoice> choices = new ArrayList<>();
-                List<QuestionChoice> matches = new ArrayList<>();
-
-                matchePairs.stream().filter(matchPair ->
-                        matchPair.getChoiceId() != null).forEach(matchPair -> {
-                    choices.add(allChoices.stream()
-                            .filter(chice -> chice.getId()
-                                    .equals(matchPair.getChoiceId()))
-                            .findFirst()
-                            .get());
-
-                    matches.add(allChoices.stream()
-                            .filter(chice -> chice.getId()
-                                    .equals(matchPair.getMatchId()))
-                            .findFirst().get());
-
-
-                });
-
-                matchePairs.stream().filter(matchPair
-                        -> matchPair.getChoiceId() == null)
-                        .forEach(matchPair -> {
-                    matches.add(allChoices.stream()
-                            .filter(chice -> chice.getId()
-                                    .equals(matchPair.getMatchId()))
-                            .findFirst().get());
-                });
-
-                question.get().setChoices(choices);
-                question.get().setMatches(matches);
-
-
-
-
-            }
+            fillChoices(locale, question.get());
             return question;
         }
 
         return Optional.empty();
+    }
+
+    private void fillChoices(final Locale locale,
+                             final Question question)
+            throws SQLException {
+        if (question.getType()
+                .equals(QuestionType.CHOOSE_THE_BEST)
+                || question.getType()
+                .equals(QuestionType.MULTI_CHOICE)) {
+            question.setChoices(
+                    listChoices(true,
+                            question.getId(), locale));
+        } else if (question.getType()
+                .equals(QuestionType.MATCH_THE_FOLLOWING)) {
+            // All Choices are available
+            List<QuestionChoice> allChoices = listChoices(true,
+                    question.getId(), locale);
+            // Match Pairs are available
+            List<Matches>  matchePairs =
+                    this.matchesStore.select(questionId().eq(question
+                            .getId())).execute();
+
+
+            List<QuestionChoice> choices = new ArrayList<>();
+            List<QuestionChoice> matches = new ArrayList<>();
+
+            matchePairs.stream().filter(matchPair ->
+                    matchPair.getChoiceId() != null).forEach(matchPair -> {
+                choices.add(allChoices.stream()
+                        .filter(chice -> chice.getId()
+                                .equals(matchPair.getChoiceId()))
+                        .findFirst()
+                        .get());
+
+                matches.add(allChoices.stream()
+                        .filter(chice -> chice.getId()
+                                .equals(matchPair.getMatchId()))
+                        .findFirst().get());
+
+
+            });
+
+            matchePairs.stream().filter(matchPair
+                    -> matchPair.getChoiceId() == null)
+                    .forEach(matchPair -> {
+                matches.add(allChoices.stream()
+                        .filter(chice -> chice.getId()
+                                .equals(matchPair.getMatchId()))
+                        .findFirst().get());
+            });
+
+            question.setChoices(choices);
+            question.setMatches(matches);
+
+
+
+
+        }
     }
 
     /**
@@ -809,13 +815,7 @@ public class QuestionService {
                 .toList();
         if (!questions.isEmpty()) {
             for (Question question : questions) {
-                if ((question.getType().equals(QuestionType.CHOOSE_THE_BEST)
-                        || question.getType()
-                        .equals(QuestionType.MULTI_CHOICE))) {
-                    question.setChoices(this
-                            .listChoices(isOwner,
-                                    question.getId(), locale));
-                }
+                fillChoices(locale, question);
             }
         }
         return questions;
@@ -858,6 +858,28 @@ public class QuestionService {
             if (question.getType().equals(QuestionType.MATCH_THE_FOLLOWING)) {
                 List<QuestionChoice> choices = question.getChoices();
                 List<QuestionChoice> matches = question.getMatches();
+                if (choices == null || choices.isEmpty()) {
+                    ConstraintViolation<Question> violation
+                            = ConstraintViolationImpl.forBeanValidation(
+                            messageTemplate, messageParameters,
+                            expressionVariables,
+                            "No choices are provided",
+                            rootBeanClass,
+                            question, leafBeanInstance, cValue, propertyPath,
+                            constraintDescriptor, elementType);
+                    violations.add(violation);
+                }
+                if (matches == null || matches.isEmpty()) {
+                    ConstraintViolation<Question> violation
+                            = ConstraintViolationImpl.forBeanValidation(
+                            messageTemplate, messageParameters,
+                            expressionVariables,
+                            "No matches are provided",
+                            rootBeanClass,
+                            question, leafBeanInstance, cValue, propertyPath,
+                            constraintDescriptor, elementType);
+                    violations.add(violation);
+                }
                 if (choices.size() > matches.size()) {
                     ConstraintViolation<Question> violation
                             = ConstraintViolationImpl.forBeanValidation(

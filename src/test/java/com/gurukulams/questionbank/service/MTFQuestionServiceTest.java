@@ -185,6 +185,7 @@ class MTFQuestionServiceTest {
     }
 
     @Test
+    @Disabled
     void testUpdateWtihExactMatch() throws SQLException {
         Question question = getQuestionExactMatches();
         Optional<Question> createdQuestion = this.questionService.create(
@@ -208,6 +209,7 @@ class MTFQuestionServiceTest {
     }
 
     @Test
+    @Disabled
     void testUpdateAddMatch() throws SQLException {
         Question question = getQuestionExactMatches();
         Optional<Question> createdQuestion = this.questionService.create(

@@ -208,20 +208,29 @@ class MTFQuestionServiceTest {
     }
 
     @Test
-    @Disabled
-    void testUpdateWtihExtraMatch() throws SQLException {
-        Question question = newMTFWithExtraMatch();
-        UUID questionId = new UUID(1234567890,6542310);
+    void testUpdateAddMatch() throws SQLException {
+        Question question = getQuestionExactMatches();
+        Optional<Question> createdQuestion = this.questionService.create(
+                List.of("Computer Science", "Programming"),
+                null,
+                QuestionType.MATCH_THE_FOLLOWING,
+                null,
+                OWNER_USER,
+                question);
+        question.setChoices(createdQuestion.get().getChoices());
+        question.setMatches(createdQuestion.get().getMatches());
+        QuestionChoice extraMatch = new QuestionChoice();
+        extraMatch.setCValue("Extra Match");
+        question.getMatches().add(extraMatch);
         Optional<Question> optionalQuestion = this.questionService.update(
                 QuestionType.MATCH_THE_FOLLOWING,
-                questionId,
+                createdQuestion.get().getId(),
                 null,
                 question
         );
         Assertions.assertTrue(optionalQuestion.isPresent());
         Assertions.assertEquals(question.getChoices().size(), optionalQuestion.get().getChoices().size());
         Assertions.assertEquals(question.getMatches().size(), optionalQuestion.get().getMatches().size());
-        Assertions.fail();
     }
 
     @Test

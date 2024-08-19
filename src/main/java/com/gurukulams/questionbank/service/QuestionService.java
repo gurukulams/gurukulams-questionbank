@@ -610,7 +610,8 @@ public class QuestionService {
             }
 
             if ((type.equals(QuestionType.CHOOSE_THE_BEST)
-                    || type.equals(QuestionType.MULTI_CHOICE))
+                    || type.equals(QuestionType.MULTI_CHOICE)
+                    || QuestionType.MATCH_THE_FOLLOWING.equals(type))
                     && question.getChoices() != null) {
 
                 List<UUID> availableIds = question.getChoices()

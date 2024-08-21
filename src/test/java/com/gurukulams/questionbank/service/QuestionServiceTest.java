@@ -58,6 +58,14 @@ abstract class QuestionServiceTest {
         questionService.delete();
     }
 
+    /**
+     * Tests the Question foir given locale.
+     * @param locale
+     * @throws SQLException
+     */
+    abstract Question testCreate(Locale locale) throws SQLException;
+
+    abstract void testUpdate(final Question questionToUpdate, Locale locale) throws SQLException;
 
     /**
      * Creates a VALID question.
@@ -65,6 +73,19 @@ abstract class QuestionServiceTest {
      */
     abstract Question crateQuestion() ;
 
+    @Test
+    void testCreate() throws SQLException {
+        testCreate(null);
+        testCreate(Locale.GERMAN);
+    }
+
+    @Test
+    void testUpdate() throws SQLException {
+        Question question = testCreate(null);
+        testUpdate(question, null);
+        question = testCreate(Locale.GERMAN);
+        testUpdate(question, Locale.GERMAN);
+    }
 
     @Test
     void testDelete() throws SQLException {

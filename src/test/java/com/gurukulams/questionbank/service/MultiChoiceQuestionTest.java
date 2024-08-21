@@ -17,7 +17,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-class MCQQuestionServiceTest extends QuestionServiceTest {
+class MultiChoiceQuestionTest extends QuestionServiceTest {
 
     @Test
     void testInvalidQuestionCreation() {
@@ -88,46 +88,8 @@ class MCQQuestionServiceTest extends QuestionServiceTest {
 
     }
 
-    @Test
-    void testChooseTheBest() throws SQLException {
-        testChooseTheBest(null);
-        testChooseTheBest(Locale.GERMAN);
-
-    }
-
-    void testChooseTheBest(Locale locale) throws SQLException {
-        Question crateQuestion = crateQuestion();
-
-        crateQuestion.getChoices().get(0).setIsAnswer(true);
-
-        // Create a Question
-        Optional<Question> question = questionService.create(List.of("c1",
-                        "c2"),
-                null,
-                QuestionType.CHOOSE_THE_BEST,
-                locale,
-                OWNER_USER,
-                crateQuestion);
-
-        // Right Answer
-        Assertions.assertTrue(answerService.answer(question.get().getId(),
-                question.get().getChoices().stream()
-                        .filter(QuestionChoice::getIsAnswer)
-                        .findFirst().get().getId().toString()));
-
-        // Wrong Answer
-        Assertions.assertFalse(answerService.answer(question.get().getId(),
-                question.get().getChoices().stream()
-                        .filter(choice -> !choice.getIsAnswer())
-                        .findFirst().get().getId().toString()));
-
-
-        testUpdates(question, locale);
-    }
-
-    private void testUpdates(final Optional<Question> question, Locale locale) throws SQLException {
-        Question questionToUpdate = question.get();
-
+    @Override
+    void testUpdate(final Question questionToUpdate,final Locale locale) throws SQLException {
         questionToUpdate.setQuestion("Updated");
 
         this.questionService.update(questionToUpdate.getType(),
@@ -137,7 +99,7 @@ class MCQQuestionServiceTest extends QuestionServiceTest {
                 this.questionService.read(questionToUpdate.getId(),locale)
                         .get().getQuestion());
 
-        QuestionChoice questionChoice = question.get().getChoices().get(0);
+        QuestionChoice questionChoice = questionToUpdate.getChoices().get(0);
 
         questionChoice.setCValue("Updated");
 
@@ -150,7 +112,7 @@ class MCQQuestionServiceTest extends QuestionServiceTest {
                     .filter(questionChoice1 -> questionChoice1.getId().equals(questionChoice.getId()))
                     .findFirst().get().getCValue());
 
-        int existingQuestions = question.get().getChoices().size();
+        int existingQuestions = questionToUpdate.getChoices().size();
 
         String cValue = UUID.randomUUID().toString();
         QuestionChoice choice = new QuestionChoice();
@@ -184,25 +146,16 @@ class MCQQuestionServiceTest extends QuestionServiceTest {
 
     }
 
-    @Test
-    void testMultiChoice() throws SQLException {
-
-        testMultiChoice(null);
-        testMultiChoice(Locale.GERMAN);
-    }
-
-    void testMultiChoice(Locale locale) throws SQLException {
+    @Override
+    Question testCreate(Locale locale) throws SQLException {
         Question crateQuestion = crateQuestion();
-
-        crateQuestion.getChoices().get(0).setIsAnswer(true);
-        crateQuestion.getChoices().get(2).setIsAnswer(true);
 
         // Create a Question
         Optional<Question> question = questionService.create(List.of("c1",
                         "c2"),
                 null,
                 QuestionType.MULTI_CHOICE,
-                null,
+                locale,
                 OWNER_USER,
                 crateQuestion);
 
@@ -227,10 +180,12 @@ class MCQQuestionServiceTest extends QuestionServiceTest {
                         .filter(choice -> !choice.getIsAnswer())
                         .findFirst().get().getId().toString()));
 
-        testUpdates(question, locale);
+        return question.get();
+
+
     }
 
-
+    @Override
     Question crateQuestion() {
         Question question = new Question();
         question.setQuestion("Choose 1");
@@ -248,6 +203,7 @@ class MCQQuestionServiceTest extends QuestionServiceTest {
 
         choice = new QuestionChoice();
         choice.setCValue("3");
+        choice.setIsAnswer(true);
         question.getChoices().add(choice);
 
         choice = new QuestionChoice();

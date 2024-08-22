@@ -147,28 +147,6 @@ class MultiChoiceQuestionTest extends QuestionServiceTest {
     }
 
     @Override
-    Question testCreate(Locale locale) throws SQLException {
-        Question crateQuestion = crateQuestion();
-
-        // Create a Question
-        Optional<Question> question = questionService.create(List.of("c1",
-                        "c2"),
-                null,
-                QuestionType.MULTI_CHOICE,
-                locale,
-                OWNER_USER,
-                crateQuestion);
-
-
-
-
-
-        return question.get();
-
-
-    }
-
-    @Override
     String getCorrectAnswer(Question question) throws SQLException {
         return question.getChoices().stream()
                 .filter(QuestionChoice::getIsAnswer)
@@ -184,6 +162,7 @@ class MultiChoiceQuestionTest extends QuestionServiceTest {
     @Override
     Question crateQuestion() {
         Question question = new Question();
+        question.setType(QuestionType.MULTI_CHOICE);
         question.setQuestion("Choose 1");
         question.setExplanation("A Choose the best question");
         question.setChoices(new ArrayList<>());

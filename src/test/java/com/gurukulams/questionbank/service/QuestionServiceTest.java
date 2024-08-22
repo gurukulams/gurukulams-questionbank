@@ -57,13 +57,6 @@ abstract class QuestionServiceTest {
     }
 
     /**
-     * Tests the Question foir given locale.
-     * @param locale
-     * @throws SQLException
-     */
-    abstract Question testCreate(Locale locale) throws SQLException;
-
-    /**
      * Gets Correct Answer.
      * @param question
      * @throws SQLException
@@ -98,6 +91,28 @@ abstract class QuestionServiceTest {
         // Wrong Answer
         Assertions.assertFalse(answerService.answer(question.getId(),
                 getWrongAnswer(question)));
+    }
+
+    /**
+     * Tests the Question foir given locale.
+     * @param locale
+     * @throws SQLException
+     */
+    protected Question testCreate(Locale locale) throws SQLException {
+        Question crateQuestion = crateQuestion();
+
+        // Create a Question
+        Optional<Question> question = questionService.create(List.of("c1",
+                        "c2"),
+                null,
+                crateQuestion.getType(),
+                locale,
+                OWNER_USER,
+                crateQuestion);
+
+        return question.get();
+
+
     }
 
     @Test

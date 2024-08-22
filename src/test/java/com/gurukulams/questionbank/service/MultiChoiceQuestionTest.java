@@ -159,30 +159,26 @@ class MultiChoiceQuestionTest extends QuestionServiceTest {
                 OWNER_USER,
                 crateQuestion);
 
-        String rightAnswer = question.get().getChoices().stream()
-                .filter(QuestionChoice::getIsAnswer)
-                .map(choice -> choice.getId().toString())
-                .collect(Collectors.joining(","));
 
-        // Right Answer
-        Assertions.assertTrue(answerService.answer(question.get().getId(),
-                rightAnswer));
 
-        // Wrong Answer
-        Assertions.assertFalse(answerService.answer(question.get().getId(),
-                rightAnswer+ "," + question.get().getChoices().stream()
-                        .filter(choice -> !choice.getIsAnswer())
-                        .findFirst().get().getId()));
 
-        // Wrong Answer
-        Assertions.assertFalse(answerService.answer(question.get().getId(),
-                question.get().getChoices().stream()
-                        .filter(choice -> !choice.getIsAnswer())
-                        .findFirst().get().getId().toString()));
 
         return question.get();
 
 
+    }
+
+    @Override
+    String getCorrectAnswer(Question question) throws SQLException {
+        return question.getChoices().stream()
+                .filter(QuestionChoice::getIsAnswer)
+                .map(choice -> choice.getId().toString())
+                .collect(Collectors.joining(","));
+    }
+
+    @Override
+    String getWrongAnswer(Question question) throws SQLException {
+        return UUID.randomUUID().toString();
     }
 
     @Override

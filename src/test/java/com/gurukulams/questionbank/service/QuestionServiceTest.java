@@ -5,7 +5,6 @@ import com.gurukulams.questionbank.payload.QuestionType;
 import com.gurukulams.questionbank.util.TestUtil;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,9 +26,8 @@ abstract class QuestionServiceTest {
     protected final AnswerService answerService;
 
     QuestionServiceTest() {
-        ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
-
-        Validator validator = validatorFactory.getValidator();
+        Validator validator = Validation.buildDefaultValidatorFactory()
+                .getValidator();
         this.questionService = new QuestionService(
                 validator,
                 TestUtil.questionBankManager());
@@ -65,6 +63,20 @@ abstract class QuestionServiceTest {
      */
     abstract Question testCreate(Locale locale) throws SQLException;
 
+    /**
+     * Gets Correct Answer.
+     * @param question
+     * @throws SQLException
+     */
+    abstract String getCorrectAnswer(final Question question) throws SQLException;
+
+    /**
+     * Gets Correct Answer.
+     * @param question
+     * @throws SQLException
+     */
+    abstract String getWrongAnswer(final Question question) throws SQLException;
+
     abstract void testUpdate(final Question questionToUpdate, Locale locale) throws SQLException;
 
     /**
@@ -75,8 +87,17 @@ abstract class QuestionServiceTest {
 
     @Test
     void testCreate() throws SQLException {
-        testCreate(null);
-        testCreate(Locale.GERMAN);
+        testAnswers(testCreate(null));;
+        testAnswers(testCreate(Locale.GERMAN));
+    }
+
+    private void testAnswers(Question question) throws SQLException {
+        // Right Answer
+        Assertions.assertTrue(answerService.answer(question.getId(),
+                getCorrectAnswer(question)));
+        // Wrong Answer
+        Assertions.assertFalse(answerService.answer(question.getId(),
+                getWrongAnswer(question)));
     }
 
     @Test

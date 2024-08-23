@@ -3,6 +3,7 @@ package com.gurukulams.questionbank.service;
 import com.gurukulams.questionbank.payload.Question;
 import com.gurukulams.questionbank.payload.QuestionType;
 import com.gurukulams.questionbank.util.TestUtil;
+import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import org.junit.jupiter.api.AfterEach;
@@ -63,6 +64,23 @@ abstract class QuestionServiceTest {
      */
     abstract String getCorrectAnswer(final Question question) throws SQLException;
 
+    @Test
+    void testInvalidQuestionCreation() {
+
+        getInvalidQuestions().forEach(question -> {
+            Assertions.assertThrows(ConstraintViolationException.class, () ->
+                    questionService.create(List.of("c1",
+                                    "c2"),
+                            null,
+                            question.getType(),
+                            null,
+                            OWNER_USER,
+                            question)
+            );
+        });
+
+    }
+
     /**
      * Gets Correct Answer.
      * @param question
@@ -76,7 +94,7 @@ abstract class QuestionServiceTest {
      * Creates a VALID question.
      * @return
      */
-    abstract Question crateQuestion() ;
+    abstract Question getTestQuestion() ;
 
     @Test
     void testCreate() throws SQLException {
@@ -99,7 +117,7 @@ abstract class QuestionServiceTest {
      * @throws SQLException
      */
     protected Question testCreate(Locale locale) throws SQLException {
-        Question crateQuestion = crateQuestion();
+        Question crateQuestion = getTestQuestion();
 
         // Create a Question
         Optional<Question> question = questionService.create(List.of("c1",
@@ -125,7 +143,7 @@ abstract class QuestionServiceTest {
 
     @Test
     void testDelete() throws SQLException {
-        Question crateQuestion = crateQuestion();
+        Question crateQuestion = getTestQuestion();
 
 
         // Create a Question
@@ -146,7 +164,7 @@ abstract class QuestionServiceTest {
 
     @Test
     void testList() throws SQLException {
-        Question crateQuestion = crateQuestion();
+        Question crateQuestion = getTestQuestion();
 
 
 
@@ -186,5 +204,11 @@ abstract class QuestionServiceTest {
                         "c2")).size());
 
     }
+
+    /**
+     * Invalid Questions.
+     * @return
+     */
+    abstract List<Question> getInvalidQuestions();
 
 }

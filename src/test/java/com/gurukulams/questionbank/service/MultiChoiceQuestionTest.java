@@ -19,74 +19,8 @@ import java.util.stream.Collectors;
 
 class MultiChoiceQuestionTest extends QuestionServiceTest {
 
-    @Test
-    void testInvalidQuestionCreation() {
-        Question question = crateQuestion();
-
-        question.getChoices().forEach(questionChoice -> questionChoice.setIsAnswer(false));
-
-        // No Answer
-        Assertions.assertThrows(ConstraintViolationException.class, () ->
-                questionService.create(List.of("c1",
-                                "c2"),
-                        null,
-                        QuestionType.CHOOSE_THE_BEST,
-                        null,
-                        OWNER_USER,
-                        question)
-                );
-
-        question.getChoices().remove(0);
-        question.getChoices().remove(0);
-        question.getChoices().remove(0);
-
-        // No Answer
-        Assertions.assertThrows(ConstraintViolationException.class, () ->
-                questionService.create(List.of("c1",
-                                "c2"),
-                        null,
-                        QuestionType.CHOOSE_THE_BEST,
-                        null,
-                        OWNER_USER,
-                        question)
-        );
-
-        question.setChoices(null);
-        // No Answer
-        Assertions.assertThrows(ConstraintViolationException.class, () ->
-                questionService.create(List.of("c1",
-                                "c2"),
-                        null,
-                        QuestionType.SINGLE_LINE,
-                        null,
-                        OWNER_USER,
-                        question)
-        );
-    }
-
-    @Test
-    void testInvalidQuestionUpdate() throws SQLException {
-        Question crateQuestion = crateQuestion();
-
-        crateQuestion.getChoices().get(0).setIsAnswer(true);
-
-        // Create a Question
-        Optional<Question> question = questionService.create(List.of("c1",
-                        "c2"),
-                null,
-                QuestionType.CHOOSE_THE_BEST,
-                null,
-                OWNER_USER,
-                crateQuestion);
-
-        question.get().setChoices(null);
-
-        Assertions.assertThrows(ConstraintViolationException.class, () ->
-                questionService.update(question.get().getType(), question.get().getId(), null, question.get())
-        );
 
 
-    }
 
     @Override
     void testUpdate(final Question questionToUpdate,final Locale locale) throws SQLException {
@@ -160,7 +94,7 @@ class MultiChoiceQuestionTest extends QuestionServiceTest {
     }
 
     @Override
-    Question crateQuestion() {
+    Question getTestQuestion() {
         Question question = new Question();
         question.setType(QuestionType.MULTI_CHOICE);
         question.setQuestion("Choose 1");
@@ -186,5 +120,37 @@ class MultiChoiceQuestionTest extends QuestionServiceTest {
         question.getChoices().add(choice);
 
         return question;
+    }
+
+    @Override
+    List<Question> getInvalidQuestions() {
+
+        List<Question> invalidQuestions  = new ArrayList<>();
+
+        Question question = getTestQuestion();
+
+        // Question without Answer
+        question.getChoices().forEach(questionChoice -> questionChoice.setIsAnswer(false));
+
+        invalidQuestions.add(question);
+
+
+        question = getTestQuestion();
+        question.getChoices().remove(0);
+        question.getChoices().remove(0);
+        question.getChoices().remove(0);
+
+        // Question with Only One Choice
+        invalidQuestions.add(question);
+
+        question = getTestQuestion();
+
+
+        question.setChoices(null);
+
+        // Question with Null Choice
+        invalidQuestions.add(question);
+
+        return invalidQuestions;
     }
 }

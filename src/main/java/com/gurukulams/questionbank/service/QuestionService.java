@@ -504,7 +504,7 @@ public class QuestionService {
             matchePairs.stream().filter(matchPair ->
                     matchPair.getChoiceId() != null).forEach(matchPair -> {
                 choices.add(allChoices.stream()
-                        .filter(chice -> chice.getId()
+                        .filter(choice -> choice.getId()
                                 .equals(matchPair.getChoiceId()))
                         .findFirst()
                         .get());
@@ -610,7 +610,8 @@ public class QuestionService {
             }
 
             if ((type.equals(QuestionType.CHOOSE_THE_BEST)
-                    || type.equals(QuestionType.MULTI_CHOICE))
+                    || type.equals(QuestionType.MULTI_CHOICE)
+                    || QuestionType.MATCH_THE_FOLLOWING.equals(type))
                     && question.getChoices() != null) {
 
                 List<UUID> availableIds = question.getChoices()
@@ -618,6 +619,14 @@ public class QuestionService {
                         .filter(choice -> choice.getId() != null)
                         .map(QuestionChoice::getId)
                         .collect(Collectors.toList());
+
+                if (QuestionType.MATCH_THE_FOLLOWING.equals(type)) {
+                    availableIds.addAll(question.getMatches()
+                            .stream()
+                            .filter(choice -> choice.getId() != null)
+                            .map(QuestionChoice::getId)
+                            .toList());
+                }
 
                 if (!availableIds.isEmpty()) {
 
@@ -729,6 +738,19 @@ public class QuestionService {
                 .execute();
     }
 
+    /**
+     * delete all records from questionchoice with the given question id.
+     *
+     * @param questionId
+     */
+    public void deleteMatches(final UUID questionId)
+            throws SQLException {
+
+
+        this.matchesStore
+                .delete(MatchesStore.questionId().eq(questionId))
+                .execute();
+    }
 
     /**
      * List question of exam.
@@ -880,7 +902,7 @@ public class QuestionService {
                             constraintDescriptor, elementType);
                     violations.add(violation);
                 }
-                if (choices.size() > matches.size()) {
+                if (violations.isEmpty() && choices.size() > matches.size()) {
                     ConstraintViolation<Question> violation
                             = ConstraintViolationImpl.forBeanValidation(
                             messageTemplate, messageParameters,
@@ -948,7 +970,11 @@ public class QuestionService {
                        final QuestionType questionType)
             throws SQLException {
 
+        if (QuestionType.MATCH_THE_FOLLOWING.equals(questionType)) {
+            deleteMatches(questionId);
+        }
         deleteChoices(questionId);
+
 
         this.questionLocalizedStore
                 .delete(QuestionLocalizedStore.questionId().eq(questionId))
@@ -998,6 +1024,7 @@ public class QuestionService {
      * Deletes Questions.
      */
     public void delete() throws SQLException {
+        this.matchesStore.delete().execute();
         this.questionCategoryStore.delete().execute();
         this.questionTagStore.delete().execute();
 

@@ -1,11 +1,10 @@
 package com.gurukulams.questionbank.service;
 
 import com.gurukulams.questionbank.payload.Question;
-import com.gurukulams.questionbank.payload.QuestionType;
 import com.gurukulams.questionbank.util.TestUtil;
+import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,9 +26,8 @@ abstract class QuestionServiceTest {
     protected final AnswerService answerService;
 
     QuestionServiceTest() {
-        ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
-
-        Validator validator = validatorFactory.getValidator();
+        Validator validator = Validation.buildDefaultValidatorFactory()
+                .getValidator();
         this.questionService = new QuestionService(
                 validator,
                 TestUtil.questionBankManager());
@@ -58,30 +56,105 @@ abstract class QuestionServiceTest {
         questionService.delete();
     }
 
+    /**
+     * Gets Correct Answer.
+     * @param question
+     * @throws SQLException
+     */
+    abstract String getCorrectAnswer(final Question question);
+
+    @Test
+    void testInvalidQuestions() {
+        getInvalidQuestions().forEach(question -> {
+            Assertions.assertThrows(ConstraintViolationException.class, () ->
+                    questionService.create(List.of("c1",
+                                    "c2"),
+                            null,
+                            question.getType(),
+                            null,
+                            OWNER_USER,
+                            question)
+            );
+        });
+
+    }
+
+    /**
+     * Gets Correct Answer.
+     * @param question
+     * @throws SQLException
+     */
+    abstract String getWrongAnswer(final Question question);
+
+    abstract void testUpdate(final Question questionToUpdate, Locale locale) throws SQLException;
 
     /**
      * Creates a VALID question.
      * @return
      */
-    abstract Question crateQuestion() ;
+    abstract Question getTestQuestion() ;
 
+    @Test
+    void testCreate() throws SQLException {
+        testAnswers(testCreate(null));;
+        testAnswers(testCreate(Locale.GERMAN));
+    }
+
+    private void testAnswers(Question question) throws SQLException {
+        // Right Answer
+        Assertions.assertTrue(answerService.answer(question.getId(),
+                getCorrectAnswer(question)));
+        // Wrong Answer
+        Assertions.assertFalse(answerService.answer(question.getId(),
+                getWrongAnswer(question)));
+    }
+
+    /**
+     * Tests the Question foir given locale.
+     * @param locale
+     * @throws SQLException
+     */
+    protected Question testCreate(Locale locale) throws SQLException {
+        Question crateQuestion = getTestQuestion();
+
+        // Create a Question
+        Optional<Question> question = questionService.create(List.of("c1",
+                        "c2"),
+                null,
+                crateQuestion.getType(),
+                locale,
+                OWNER_USER,
+                crateQuestion);
+
+        return question.get();
+
+
+    }
+
+    @Test
+    void testUpdate() throws SQLException {
+        Question question = testCreate(null);
+        testUpdate(question, null);
+        question = testCreate(Locale.GERMAN);
+        testUpdate(question, Locale.GERMAN);
+    }
 
     @Test
     void testDelete() throws SQLException {
-        Question crateQuestion = crateQuestion();
+        Question crateQuestion = getTestQuestion();
 
 
         // Create a Question
         Optional<Question> question = questionService.create(List.of("c1",
                         "c2"),
                 null,
-                QuestionType.CHOOSE_THE_BEST,
+                crateQuestion.getType(),
                 null,
                 OWNER_USER,
                 crateQuestion);
 
 
-        questionService.delete(question.get().getId(), QuestionType.CHOOSE_THE_BEST);
+        questionService.delete(question.get().getId(), crateQuestion.getType());
 
         Assertions.assertTrue(questionService.read(question.get().getId(), null).isEmpty());
 
@@ -89,7 +162,7 @@ abstract class QuestionServiceTest {
 
     @Test
     void testList() throws SQLException {
-        Question crateQuestion = crateQuestion();
+        Question crateQuestion = getTestQuestion();
 
 
 
@@ -97,7 +170,7 @@ abstract class QuestionServiceTest {
         questionService.create(List.of("c1",
                         "c2"),
                 null,
-                QuestionType.CHOOSE_THE_BEST,
+                crateQuestion.getType(),
                 null,
                 OWNER_USER,
                 crateQuestion);
@@ -107,7 +180,7 @@ abstract class QuestionServiceTest {
         questionService.create(List.of("c1",
                         "c2"),
                 null,
-                QuestionType.MULTI_CHOICE,
+                crateQuestion.getType(),
                 Locale.FRENCH,
                 OWNER_USER,
                 crateQuestion);
@@ -129,5 +202,11 @@ abstract class QuestionServiceTest {
                         "c2")).size());
 
     }
+
+    /**
+     * Invalid Questions.
+     * @return
+     */
+    abstract List<Question> getInvalidQuestions();
 
 }

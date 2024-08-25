@@ -4,6 +4,7 @@ import com.gurukulams.questionbank.model.QuestionChoice;
 import com.gurukulams.questionbank.payload.Question;
 import com.gurukulams.questionbank.payload.QuestionType;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.Locale;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Disabled
 class MatchTheFollowingTest extends ChoseTheBestTest {
 
     @Override

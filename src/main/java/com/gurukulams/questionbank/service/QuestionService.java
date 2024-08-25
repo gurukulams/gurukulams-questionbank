@@ -37,6 +37,7 @@ import java.util.UUID;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
+import static com.gurukulams.questionbank.store.MatchesStore.getMatchesStore;
 import static com.gurukulams.questionbank.store.MatchesStore.questionId;
 
 /**
@@ -730,6 +731,19 @@ public class QuestionService {
                 .execute();
     }
 
+    /**
+     * delete all records from questionchoice with the given question id.
+     *
+     * @param questionId
+     */
+    public void deleteMatches(final UUID questionId)
+            throws SQLException {
+
+
+        this.matchesStore
+                .delete(MatchesStore.questionId().eq(questionId))
+                .execute();
+    }
 
     /**
      * List question of exam.
@@ -881,7 +895,7 @@ public class QuestionService {
                             constraintDescriptor, elementType);
                     violations.add(violation);
                 }
-                if (choices.size() > matches.size()) {
+                if (violations.isEmpty() && choices.size() > matches.size()) {
                     ConstraintViolation<Question> violation
                             = ConstraintViolationImpl.forBeanValidation(
                             messageTemplate, messageParameters,
@@ -949,7 +963,11 @@ public class QuestionService {
                        final QuestionType questionType)
             throws SQLException {
 
+        if (QuestionType.MATCH_THE_FOLLOWING.equals(questionType)) {
+            deleteMatches(questionId);
+        }
         deleteChoices(questionId);
+
 
         this.questionLocalizedStore
                 .delete(QuestionLocalizedStore.questionId().eq(questionId))
@@ -999,6 +1017,7 @@ public class QuestionService {
      * Deletes Questions.
      */
     public void delete() throws SQLException {
+        this.matchesStore.delete().execute();
         this.questionCategoryStore.delete().execute();
         this.questionTagStore.delete().execute();
 

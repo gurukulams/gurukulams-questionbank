@@ -26,6 +26,18 @@ class MatchTheFollowingTest extends ChoseTheBestTest {
     }
 
     @Override
+    List<Question> getInvalidQuestions() {
+
+        List<Question> invalidQuestions = new ArrayList<>();
+
+        Question question = getTestQuestion();
+        //null matches
+        question.setMatches(null);
+        invalidQuestions.add(question);
+        return invalidQuestions;
+    }
+
+    @Override
     Question getTestQuestion() {
         Question question = super.getTestQuestion();
         question.setType(QuestionType.MATCH_THE_FOLLOWING);

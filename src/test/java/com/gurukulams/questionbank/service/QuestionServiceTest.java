@@ -1,7 +1,6 @@
 package com.gurukulams.questionbank.service;
 
 import com.gurukulams.questionbank.payload.Question;
-import com.gurukulams.questionbank.payload.QuestionType;
 import com.gurukulams.questionbank.util.TestUtil;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validation;
@@ -149,13 +148,13 @@ abstract class QuestionServiceTest {
         Optional<Question> question = questionService.create(List.of("c1",
                         "c2"),
                 null,
-                QuestionType.CHOOSE_THE_BEST,
+                crateQuestion.getType(),
                 null,
                 OWNER_USER,
                 crateQuestion);
 
 
-        questionService.delete(question.get().getId(), QuestionType.CHOOSE_THE_BEST);
+        questionService.delete(question.get().getId(), crateQuestion.getType());
 
         Assertions.assertTrue(questionService.read(question.get().getId(), null).isEmpty());
 
@@ -171,7 +170,7 @@ abstract class QuestionServiceTest {
         questionService.create(List.of("c1",
                         "c2"),
                 null,
-                QuestionType.CHOOSE_THE_BEST,
+                crateQuestion.getType(),
                 null,
                 OWNER_USER,
                 crateQuestion);
@@ -181,7 +180,7 @@ abstract class QuestionServiceTest {
         questionService.create(List.of("c1",
                         "c2"),
                 null,
-                QuestionType.MULTI_CHOICE,
+                crateQuestion.getType(),
                 Locale.FRENCH,
                 OWNER_USER,
                 crateQuestion);

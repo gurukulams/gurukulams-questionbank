@@ -504,7 +504,7 @@ public class QuestionService {
             matchePairs.stream().filter(matchPair ->
                     matchPair.getChoiceId() != null).forEach(matchPair -> {
                 choices.add(allChoices.stream()
-                        .filter(chice -> chice.getId()
+                        .filter(choice -> choice.getId()
                                 .equals(matchPair.getChoiceId()))
                         .findFirst()
                         .get());

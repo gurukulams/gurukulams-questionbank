@@ -621,6 +621,14 @@ public class QuestionService {
                         .map(QuestionChoice::getId)
                         .collect(Collectors.toList());
 
+                if(QuestionType.MATCH_THE_FOLLOWING.equals(type)) {
+                    availableIds.addAll(question.getMatches()
+                            .stream()
+                            .filter(choice -> choice.getId() != null)
+                            .map(QuestionChoice::getId)
+                            .toList());
+                }
+
                 if (!availableIds.isEmpty()) {
 
                     final String deleteLocallizedChoiceSQL =

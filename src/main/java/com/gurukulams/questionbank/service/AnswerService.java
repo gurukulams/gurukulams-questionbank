@@ -5,12 +5,10 @@ import com.gurukulams.questionbank.payload.Question;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * The type Answer service.
@@ -80,13 +78,15 @@ public class AnswerService {
                             .addAll(question.getChoices());
 
                     questionChoices
-                            .addAll(question.getMatches().subList(0, question.getChoices().size()));
+                            .addAll(question.getMatches()
+                                    .subList(0, question.getChoices().size()));
 
                     if (!questionChoices.isEmpty()) {
                         List<String> answerIds = List.of(answer.split(","));
                         isRigntAnswer =
                                 questionChoices.stream()
-                                        .map(choice -> choice.getId().toString())
+                                        .map(choice ->
+                                                choice.getId().toString())
                                         .toList()
                                         .containsAll(answerIds);
                     }

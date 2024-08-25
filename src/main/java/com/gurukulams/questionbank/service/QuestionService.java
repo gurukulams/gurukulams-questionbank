@@ -37,7 +37,6 @@ import java.util.UUID;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-import static com.gurukulams.questionbank.store.MatchesStore.getMatchesStore;
 import static com.gurukulams.questionbank.store.MatchesStore.questionId;
 
 /**
@@ -621,7 +620,7 @@ public class QuestionService {
                         .map(QuestionChoice::getId)
                         .collect(Collectors.toList());
 
-                if(QuestionType.MATCH_THE_FOLLOWING.equals(type)) {
+                if (QuestionType.MATCH_THE_FOLLOWING.equals(type)) {
                     availableIds.addAll(question.getMatches()
                             .stream()
                             .filter(choice -> choice.getId() != null)

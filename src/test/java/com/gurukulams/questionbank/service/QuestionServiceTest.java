@@ -62,11 +62,10 @@ abstract class QuestionServiceTest {
      * @param question
      * @throws SQLException
      */
-    abstract String getCorrectAnswer(final Question question) throws SQLException;
+    abstract String getCorrectAnswer(final Question question);
 
     @Test
-    void testInvalidQuestionCreation() {
-
+    void testInvalidQuestions() {
         getInvalidQuestions().forEach(question -> {
             Assertions.assertThrows(ConstraintViolationException.class, () ->
                     questionService.create(List.of("c1",
@@ -86,7 +85,7 @@ abstract class QuestionServiceTest {
      * @param question
      * @throws SQLException
      */
-    abstract String getWrongAnswer(final Question question) throws SQLException;
+    abstract String getWrongAnswer(final Question question);
 
     abstract void testUpdate(final Question questionToUpdate, Locale locale) throws SQLException;
 

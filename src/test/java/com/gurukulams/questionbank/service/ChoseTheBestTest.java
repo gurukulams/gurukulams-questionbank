@@ -3,44 +3,41 @@ package com.gurukulams.questionbank.service;
 import com.gurukulams.questionbank.model.QuestionChoice;
 import com.gurukulams.questionbank.payload.Question;
 import com.gurukulams.questionbank.payload.QuestionType;
-import static com.gurukulams.questionbank.service.QuestionService.OWNER_USER;
 
-import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
-class MultiChoiceQuestionTest extends QuestionServiceTest {
+class ChoseTheBestTest extends QuestionServiceTest {
 
-
-
+    protected static final String C_LANGUAGE = "C";
 
     @Override
     void testUpdate(final Question questionToUpdate,final Locale locale) throws SQLException {
-        questionToUpdate.setQuestion("Updated");
+
+        final String updatedQuestionTxt = "Updated at " + System.currentTimeMillis();
+
+        questionToUpdate.setQuestion(updatedQuestionTxt);
 
         this.questionService.update(questionToUpdate.getType(),
                 questionToUpdate.getId(),locale, questionToUpdate);
 
-        Assertions.assertEquals("Updated",
+        Assertions.assertEquals(updatedQuestionTxt,
                 this.questionService.read(questionToUpdate.getId(),locale)
                         .get().getQuestion());
 
         QuestionChoice questionChoice = questionToUpdate.getChoices().get(0);
 
-        questionChoice.setCValue("Updated");
+        questionChoice.setCValue(updatedQuestionTxt);
 
         this.questionService.update(questionToUpdate.getType(),
                 questionToUpdate.getId(),locale, questionToUpdate);
 
-        Assertions.assertEquals("Updated",
+        Assertions.assertEquals(updatedQuestionTxt,
                 this.questionService.read(questionToUpdate.getId(),locale).get()
                     .getChoices().stream()
                     .filter(questionChoice1 -> questionChoice1.getId().equals(questionChoice.getId()))
@@ -81,42 +78,44 @@ class MultiChoiceQuestionTest extends QuestionServiceTest {
     }
 
     @Override
-    String getCorrectAnswer(Question question) throws SQLException {
+    String getCorrectAnswer(Question question) {
         return question.getChoices().stream()
                 .filter(QuestionChoice::getIsAnswer)
-                .map(choice -> choice.getId().toString())
-                .collect(Collectors.joining(","));
+                .findFirst()
+                .get()
+                .getId().toString();
     }
 
     @Override
-    String getWrongAnswer(Question question) throws SQLException {
+    String getWrongAnswer(Question question) {
         return UUID.randomUUID().toString();
     }
 
     @Override
     Question getTestQuestion() {
         Question question = new Question();
-        question.setType(QuestionType.MULTI_CHOICE);
-        question.setQuestion("Choose 1");
-        question.setExplanation("A Choose the best question");
+        question.setType(QuestionType.CHOOSE_THE_BEST);
+
+        question.setQuestion("Which one of the folloing is a Object Oriented Language?");
+        question.setExplanation("Language that suppors class and objects");
+
         question.setChoices(new ArrayList<>());
 
         QuestionChoice choice = new QuestionChoice();
-        choice.setCValue("1");
+        choice.setCValue("Java");
         choice.setIsAnswer(true);
         question.getChoices().add(choice);
 
         choice = new QuestionChoice();
-        choice.setCValue("2");
+        choice.setCValue(C_LANGUAGE);
         question.getChoices().add(choice);
 
         choice = new QuestionChoice();
-        choice.setCValue("3");
-        choice.setIsAnswer(true);
+        choice.setCValue("Tamil");
         question.getChoices().add(choice);
 
         choice = new QuestionChoice();
-        choice.setCValue("4");
+        choice.setCValue("English");
         question.getChoices().add(choice);
 
         return question;

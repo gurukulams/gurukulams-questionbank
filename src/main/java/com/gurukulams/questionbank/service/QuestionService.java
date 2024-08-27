@@ -686,6 +686,27 @@ public class QuestionService {
                     }
                 }
 
+                int i = 0;
+                for (QuestionChoice matchChoice : question.getMatches()) {
+
+                    if (matchChoice.getId() == null) {
+                        createChoice(matchChoice, locale, id);
+                        UUID choiceId = null;
+                        if (i < question.getChoices().size()) {
+                            choiceId = question.getChoices().get(i).getId();
+                        }
+                        createMatch(id, choiceId, matchChoice.getId());
+                    } else {
+                        updateChoice(matchChoice, locale);
+                        UUID choiceId = null;
+                        if (i < question.getChoices().size()) {
+                            choiceId = question.getChoices().get(i).getId();
+                        }
+                        updateMatch(id, choiceId, matchChoice.getId());
+                    }
+                    i++;
+                }
+
             }
             return updatedRows == 0 ? null : read(id, locale);
         } else {
@@ -693,6 +714,13 @@ public class QuestionService {
         }
 
 
+    }
+
+    private void updateMatch(final UUID questionId,
+                             final UUID choiceId, final UUID matchId) throws SQLException {
+        this.matchesStore.update().set(MatchesStore.matchId(matchId),
+                MatchesStore.choiceId(choiceId))
+                .where(MatchesStore.questionId().eq(questionId).and().matchId().eq(matchId)).execute();
     }
 
     private void updateChoice(final QuestionChoice choice,

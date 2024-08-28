@@ -87,8 +87,8 @@ class ChoseTheBestTest extends QuestionServiceTest {
     }
 
     @Override
-    String getWrongAnswer(Question question) {
-        return UUID.randomUUID().toString();
+    List<String> getWrongAnswers(Question question) {
+        return List.of(UUID.randomUUID().toString());
     }
 
     @Override

@@ -8,12 +8,12 @@ import org.junit.jupiter.api.Disabled;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-//@Disabled
 class MatchTheFollowingTest extends ChoseTheBestTest {
 
     @Override
@@ -78,23 +78,34 @@ class MatchTheFollowingTest extends ChoseTheBestTest {
         Assertions.assertEquals(existingQuestions,
                 this.questionService.read(questionToUpdate.getId(),locale).get()
                         .getChoices().size());
-
-
     }
 
     @Override
     String getCorrectAnswer(Question question) {
-        List<QuestionChoice> questionChoices = new ArrayList<>();
-
-        questionChoices
-                .addAll(question.getChoices());
-
+        List<QuestionChoice> questionChoices = new ArrayList<>(question.getChoices());
         questionChoices
                 .addAll(question.getMatches().subList(0, question.getChoices().size()));
-
         return questionChoices.stream()
                 .map(choice -> choice.getId().toString())
                 .collect(Collectors.joining(","));
+    }
+
+    @Override
+    List<String> getWrongAnswers(final Question question) {
+        List<String> wrongAnswers = super.getWrongAnswers(question);
+
+        List<QuestionChoice> answerChoices = new ArrayList<>(question.getChoices());
+
+        List<QuestionChoice> matches = question.getMatches().subList(0, question.getChoices().size());
+        Collections.swap(matches, 0, 1);
+        answerChoices
+                .addAll(matches);
+
+        wrongAnswers.add(answerChoices.stream()
+                .map(choice -> choice.getId().toString())
+                .collect(Collectors.joining(","))) ;
+
+        return wrongAnswers;
     }
 
     @Override

@@ -40,7 +40,7 @@ abstract class QuestionServiceTest {
      * @throws IOException the io exception
      */
     @BeforeEach
-    void before() throws IOException, SQLException {
+    void before() throws  SQLException {
         cleanUp();
     }
 
@@ -80,11 +80,11 @@ abstract class QuestionServiceTest {
     }
 
     /**
-     * Gets Correct Answer.
+     * Gets Wrong Answers.
      * @param question
      * @throws SQLException
      */
-    abstract String getWrongAnswer(final Question question);
+    abstract List<String> getWrongAnswers(final Question question);
 
     abstract void testUpdate(final Question questionToUpdate, Locale locale) throws SQLException;
 
@@ -105,8 +105,12 @@ abstract class QuestionServiceTest {
         Assertions.assertTrue(answerService.answer(question.getId(),
                 getCorrectAnswer(question)));
         // Wrong Answer
-        Assertions.assertFalse(answerService.answer(question.getId(),
-                getWrongAnswer(question)));
+
+        for(String answer:getWrongAnswers(question)) {
+            Assertions.assertFalse(answerService.answer(question.getId(),
+                    answer));
+        }
+
     }
 
     /**

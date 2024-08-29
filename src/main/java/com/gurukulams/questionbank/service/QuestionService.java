@@ -553,7 +553,6 @@ public class QuestionService {
         Set<ConstraintViolation<Question>> violations =
                 getViolations(question);
         if (violations.isEmpty()) {
-
             int updatedRows = 0;
             if (locale == null) {
                 updatedRows = this.questionStore
@@ -574,10 +573,7 @@ public class QuestionService {
                                 .and().type().eq(type.toString()))
                         .execute();
             }
-
             if (locale != null) {
-
-
                 final String localizedUpdateQuery = """
                         UPDATE QUESTION_LOCALIZED SET question = ?,
                         explanation = ?
@@ -588,7 +584,6 @@ public class QuestionService {
                                             where type
                                             = ?  )
                         """;
-
                 updatedRows = this.questionLocalizedStore
                     .update()
                     .sql(localizedUpdateQuery)
@@ -601,25 +596,19 @@ public class QuestionService {
                     .param(QuestionLocalizedStore.locale(locale.getLanguage()))
                     .param(QuestionStore.type(type.toString()))
                     .execute();
-
                 if (updatedRows == 0) {
-
                     updatedRows = createLocalized(locale, question, id);
-
                 }
             }
-
             if ((type.equals(QuestionType.CHOOSE_THE_BEST)
                     || type.equals(QuestionType.MULTI_CHOICE)
                     || QuestionType.MATCH_THE_FOLLOWING.equals(type))
                     && question.getChoices() != null) {
-
                 List<UUID> availableIds = question.getChoices()
                         .stream()
                         .filter(choice -> choice.getId() != null)
                         .map(QuestionChoice::getId)
                         .collect(Collectors.toList());
-
                 if (QuestionType.MATCH_THE_FOLLOWING.equals(type)) {
                     availableIds.addAll(question.getMatches()
                             .stream()
@@ -627,9 +616,7 @@ public class QuestionService {
                             .map(QuestionChoice::getId)
                             .toList());
                 }
-
                 if (!availableIds.isEmpty()) {
-
                     final String deleteLocallizedChoiceSQL =
                     "DELETE FROM question_choice_localized WHERE"
                             + " choice_id IN (SELECT id FROM question_choice "
@@ -639,21 +626,17 @@ public class QuestionService {
                             .collect(Collectors.joining(","))
                             + "))";
                     availableIds.add(0, id);
-
                     QuestionChoiceLocalizedStore.DeleteStatement.DeleteQuery
                             deleteChoiceLocalizedQuery
                             = this.questionChoiceLocalizedStore
                             .delete()
                             .sql(deleteLocallizedChoiceSQL);
-
                     for (UUID cId: availableIds) {
                         deleteChoiceLocalizedQuery
                                 .param(QuestionChoiceStore.id(cId));
                     }
-
                     deleteChoiceLocalizedQuery
                             .execute();
-
                     final String deleteChoiceSQL =
                             "DELETE FROM question_choice "
                                     + "WHERE question_id = ? AND id NOT IN ("
@@ -662,22 +645,17 @@ public class QuestionService {
                                     .collect(Collectors.joining(","))
                                     + ")";
                     availableIds.add(0, id);
-
                     QuestionChoiceStore.DeleteStatement.DeleteQuery
                             deleteChoiceQuery
                             = this.questionChoiceStore
                             .delete()
                             .sql(deleteChoiceSQL);
-
                     for (UUID cId: availableIds) {
                         deleteChoiceQuery.param(QuestionChoiceStore.id(cId));
                     }
-
                     deleteChoiceQuery
                             .execute();
                 }
-
-
                 for (QuestionChoice choice : question.getChoices()) {
                     if (choice.getId() == null) {
                         createChoice(choice, locale, id);
@@ -685,14 +663,42 @@ public class QuestionService {
                         updateChoice(choice, locale);
                     }
                 }
-
+                if (QuestionType.MATCH_THE_FOLLOWING.equals(type)
+                        && question.getMatches() != null) {
+                    int i = 0;
+                    for (QuestionChoice matchChoice : question.getMatches()) {
+                        if (matchChoice.getId() == null) {
+                            createChoice(matchChoice, locale, id);
+                            UUID choiceId = null;
+                            if (i < question.getChoices().size()) {
+                                choiceId = question.getChoices().get(i).getId();
+                            }
+                            createMatch(id, choiceId, matchChoice.getId());
+                        } else {
+                            updateChoice(matchChoice, locale);
+                            UUID choiceId = null;
+                            if (i < question.getChoices().size()) {
+                                choiceId = question.getChoices().get(i).getId();
+                            }
+                            updateMatch(id, choiceId, matchChoice.getId());
+                        }
+                        i++;
+                    }
+                }
             }
             return updatedRows == 0 ? null : read(id, locale);
         } else {
             throw new ConstraintViolationException(violations);
         }
+    }
 
-
+    private void updateMatch(final UUID questionId,
+                             final UUID choiceId,
+                             final UUID matchId) throws SQLException {
+        this.matchesStore.update().set(MatchesStore.matchId(matchId),
+                MatchesStore.choiceId(choiceId))
+                .where(MatchesStore.questionId().eq(questionId)
+                        .and().matchId().eq(matchId)).execute();
     }
 
     private void updateChoice(final QuestionChoice choice,

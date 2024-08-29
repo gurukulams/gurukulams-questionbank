@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * The type Answer service.
@@ -72,23 +73,17 @@ public class AnswerService {
                     }
                     break;
                 case MATCH_THE_FOLLOWING:
-                    List<QuestionChoice> questionChoices = new ArrayList<>();
-
-                    questionChoices
-                            .addAll(question.getChoices());
-
+                    List<QuestionChoice> questionChoices =
+                            new ArrayList<>(question.getChoices());
                     questionChoices
                             .addAll(question.getMatches()
                                     .subList(0, question.getChoices().size()));
 
                     if (!questionChoices.isEmpty()) {
-                        List<String> answerIds = List.of(answer.split(","));
-                        isRigntAnswer =
-                                questionChoices.stream()
-                                        .map(choice ->
-                                                choice.getId().toString())
-                                        .toList()
-                                        .containsAll(answerIds);
+                        isRigntAnswer = answer.equals(questionChoices.stream()
+                                .map(choice ->
+                                        choice.getId().toString())
+                                .collect(Collectors.joining(",")));
                     }
                     break;
                 default:

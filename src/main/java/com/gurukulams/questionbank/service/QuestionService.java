@@ -659,7 +659,7 @@ public class QuestionService {
                     int i = 0;
                     for (QuestionChoice matchChoice : question.getMatches()) {
                         if (matchChoice.id() == null) {
-                            createChoice(matchChoice, locale, id);
+                            matchChoice = createChoice(matchChoice, locale, id);
                             UUID choiceId = null;
                             if (i < question.getChoices().size()) {
                                 choiceId = question.getChoices().get(i).id();

@@ -10,8 +10,8 @@ public class MultiChoiceTest extends ChoseTheBestTest {
     @Override
     String getCorrectAnswer(Question question) {
         return question.getChoices().stream()
-                .filter(QuestionChoice::getIsAnswer)
-                .map(choice -> choice.getId().toString())
+                .filter(QuestionChoice::isAnswer)
+                .map(choice -> choice.id().toString())
                 .collect(Collectors.joining(","));
     }
 
@@ -22,11 +22,13 @@ public class MultiChoiceTest extends ChoseTheBestTest {
 
         question.setQuestion("Which of the following are programing Languages?");
 
-        question.getChoices().stream()
-                .filter(questionChoice ->
-                        questionChoice.getCValue().equals(C_LANGUAGE))
-                .findFirst()
-                .get().setIsAnswer(true);
+        for (int i = 0; i < question.getChoices().size(); i++) {
+            if(question.getChoices().get(i).cValue().equals(C_LANGUAGE)) {
+                question.getChoices().set(i,question.getChoices().get(i).withIsAnswer(true))  ;
+            }
+        }
+
+
 
         return question;
     }

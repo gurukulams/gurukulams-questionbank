@@ -31,8 +31,9 @@ class MatchTheFollowingTest extends ChoseTheBestTest {
                         .get().getQuestion());
 
         QuestionChoice questionChoice = questionToUpdate.getChoices().get(0);
+        UUID cId = questionChoice.id();
 
-        questionChoice.setCValue(updatedQuestionTxt);
+        questionToUpdate.getChoices().set(0,questionChoice.withCValue(updatedQuestionTxt));
 
         this.questionService.update(questionToUpdate.getType(),
                 questionToUpdate.getId(),locale, questionToUpdate);
@@ -40,20 +41,17 @@ class MatchTheFollowingTest extends ChoseTheBestTest {
         Assertions.assertEquals(updatedQuestionTxt,
                 this.questionService.read(questionToUpdate.getId(),locale).get()
                         .getChoices().stream()
-                        .filter(questionChoice1 -> questionChoice1.getId().equals(questionChoice.getId()))
-                        .findFirst().get().getCValue());
+                        .filter(questionChoice1 -> questionChoice1.id().equals(cId))
+                        .findFirst().get().cValue());
 
         int existingQuestions = questionToUpdate.getChoices().size();
 
         String cValue = UUID.randomUUID().toString();
-        QuestionChoice choice = new QuestionChoice();
-        choice.setIsAnswer(Boolean.FALSE);
-        choice.setCValue(cValue);
+        QuestionChoice choice = new QuestionChoice(null, questionToUpdate.getId(), cValue, false);
+
         questionToUpdate.getChoices().add(choice);
 
-        choice = new QuestionChoice();
-        choice.setIsAnswer(Boolean.FALSE);
-        choice.setCValue(cValue);
+        choice = new QuestionChoice(null, questionToUpdate.getId(), cValue, false);
         questionToUpdate.getMatches().add(choice);
 
         this.questionService.update(questionToUpdate.getType(),
@@ -61,16 +59,16 @@ class MatchTheFollowingTest extends ChoseTheBestTest {
 
         QuestionChoice choiceReturned = this.questionService.read(questionToUpdate.getId(),locale).get()
                 .getChoices().stream()
-                .filter(questionChoice1 -> questionChoice1.getCValue().equals(cValue))
+                .filter(questionChoice1 -> questionChoice1.cValue().equals(cValue))
                 .findFirst().get();
 
         Assertions.assertTrue(
-                choiceReturned.getCValue().equals(cValue));
+                choiceReturned.cValue().equals(cValue));
 
         questionToUpdate.setChoices(this.questionService.read(questionToUpdate.getId(),locale)
                 .get()
                 .getChoices().stream()
-                .filter(questionChoice1 -> !questionChoice1.getCValue().equals(cValue)).toList());
+                .filter(questionChoice1 -> !questionChoice1.cValue().equals(cValue)).toList());
 
         this.questionService.update(questionToUpdate.getType(),
                 questionToUpdate.getId(),locale, questionToUpdate);
@@ -86,7 +84,7 @@ class MatchTheFollowingTest extends ChoseTheBestTest {
         questionChoices
                 .addAll(question.getMatches().subList(0, question.getChoices().size()));
         return questionChoices.stream()
-                .map(choice -> choice.getId().toString())
+                .map(choice -> choice.id().toString())
                 .collect(Collectors.joining(","));
     }
 
@@ -102,7 +100,7 @@ class MatchTheFollowingTest extends ChoseTheBestTest {
                 .addAll(matches);
 
         wrongAnswers.add(answerChoices.stream()
-                .map(choice -> choice.getId().toString())
+                .map(choice -> choice.id().toString())
                 .collect(Collectors.joining(","))) ;
 
         return wrongAnswers;
@@ -127,9 +125,9 @@ class MatchTheFollowingTest extends ChoseTheBestTest {
 
         question.setQuestion("Match the Following");
 
-        question.getChoices()
-                .forEach(questionChoice ->
-                        questionChoice.setIsAnswer(false));
+        for (int i = 0; i < question.getChoices().size(); i++) {
+            question.getChoices().set(i, question.getChoices().get(i).withIsAnswer(false));
+        }
 
         question.setMatches(getMatches());
 
@@ -139,20 +137,16 @@ class MatchTheFollowingTest extends ChoseTheBestTest {
     private List<QuestionChoice> getMatches() {
         List<QuestionChoice> matches = new ArrayList<>();
 
-        QuestionChoice choice = new QuestionChoice();
-        choice.setCValue("Object Oriented");
+        QuestionChoice choice = new QuestionChoice(null, null, "Object Oriented", false);
         matches.add(choice);
 
-        choice = new QuestionChoice();
-        choice.setCValue("System Language");
+        choice = new QuestionChoice(null, null,"System Language", false);
         matches.add(choice);
 
-        choice = new QuestionChoice();
-        choice.setCValue("Regional Language");
+        choice = new QuestionChoice(null, null, "Regional Language",false);
         matches.add(choice);
 
-        choice = new QuestionChoice();
-        choice.setCValue("Universal Language");
+        choice = new QuestionChoice(null, null, "Universal Language",false);
         matches.add(choice);
 
         return matches;

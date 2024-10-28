@@ -1,6 +1,6 @@
 package com.gurukulams.questionbank.service;
 
-import com.gurukulams.questionbank.QuestionBankManager;
+import com.gurukulams.questionbank.DataManager;
 import com.gurukulams.questionbank.model.Matches;
 import com.gurukulams.questionbank.model.QuestionCategory;
 import com.gurukulams.questionbank.model.QuestionChoice;
@@ -99,7 +99,7 @@ public class QuestionService {
      * @param gurukulamsManager
      */
     public QuestionService(final Validator aValidator,
-                           final QuestionBankManager gurukulamsManager) {
+                           final DataManager gurukulamsManager) {
         this.validator = aValidator;
         this.questionStore = gurukulamsManager
                 .getQuestionStore();
@@ -175,25 +175,17 @@ public class QuestionService {
                     QuestionChoice choice = choices.get(i);
                     QuestionChoice matchChoice = matches.get(i);
 
-                    UUID choiceId = choice.getId();
-                    UUID matchId = matchChoice.getId();
+                    UUID choiceId = choice.id();
+                    UUID matchId = matchChoice.id();
 
-                    Matches match = new Matches();
-                    match.setQuestionId(id);
-                    match.setChoiceId(choiceId);
-                    match.setMatchId(matchId);
+                    Matches match = new Matches(id, choiceId, matchId);
 
                     matchesToCreate.add(match);
                 }
 
                 if (!extraMatch.isEmpty()) {
                     for (QuestionChoice eMatch : extraMatch) {
-
-                        Matches match = new Matches();
-                        UUID extraMatchId = eMatch.getId();
-                        match.setQuestionId(id);
-                        match.setMatchId(extraMatchId);
-
+                        Matches match = new Matches(id, eMatch.id(), null);
                         matchesToCreate.add(match);
                     }
                 }
@@ -220,12 +212,10 @@ public class QuestionService {
                                 final Question question,
                                 final UUID id)
             throws SQLException {
-        QuestionLocalized questionLocalized = new QuestionLocalized();
-
-        questionLocalized.setQuestionId(id);
-        questionLocalized.setQuestion(question.getQuestion());
-        questionLocalized.setExplanation(question.getExplanation());
-        questionLocalized.setLocale(locale.getLanguage());
+        QuestionLocalized questionLocalized = new QuestionLocalized(id,
+                locale.getLanguage(),
+                question.getQuestion(),
+                question.getExplanation());
 
         return this.questionLocalizedStore
                 .insert()
@@ -236,14 +226,18 @@ public class QuestionService {
     private com.gurukulams.questionbank.model.Question
     getQuestionModel(final String createdBy, final Question question) {
         com.gurukulams.questionbank.model.Question questionModel
-                = new com.gurukulams.questionbank.model.Question();
-        questionModel.setQuestion(question.getQuestion());
-        questionModel.setExplanation(question.getExplanation());
-        questionModel.setId(question.getId());
-        questionModel.setAnswer(question.getAnswer());
-        questionModel.setType(question.getType().name());
-        questionModel.setCreatedBy(createdBy);
-        questionModel.setCreatedAt(question.getCreatedAt());
+                = new com.gurukulams.questionbank.model.Question(
+                question.getId(),
+                question.getQuestion(),
+                question.getExplanation(),
+                question.getType().name(),
+                question.getAnswer(),
+                question.getCreatedAt(),
+                createdBy,
+                null,
+                null
+                );
+
         return questionModel;
     }
 
@@ -252,37 +246,37 @@ public class QuestionService {
                         questionModel) {
         Question question
                 = new Question();
-        question.setQuestion(questionModel.getQuestion());
-        question.setExplanation(questionModel.getExplanation());
-        question.setId(questionModel.getId());
-        question.setAnswer(questionModel.getAnswer());
-        question.setType(QuestionType.valueOf(questionModel.getType()));
-        question.setCreatedBy(questionModel.getCreatedBy());
-        question.setCreatedAt(questionModel.getCreatedAt());
-        question.setUpdatedAt(questionModel.getModifiedAt());
+        question.setQuestion(questionModel.question());
+        question.setExplanation(questionModel.explanation());
+        question.setId(questionModel.id());
+        question.setAnswer(questionModel.answer());
+        question.setType(QuestionType.valueOf(questionModel.type()));
+        question.setCreatedBy(questionModel.createdBy());
+        question.setCreatedAt(questionModel.createdAt());
+        question.setUpdatedAt(questionModel.modifiedAt());
         return question;
     }
 
     private QuestionChoice createChoice(
-            final QuestionChoice choice,
+            final QuestionChoice choiceToCrete,
             final Locale locale,
             final UUID questionId) throws SQLException {
 
-        if (choice == null) {
+        if (choiceToCrete == null) {
             return null;
         }
         UUID choiceId = UUID.randomUUID();
 
-        choice.setId(choiceId);
-        choice.setQuestionId(questionId);
-        if (choice.getIsAnswer() == null) {
-            choice.setIsAnswer(Boolean.FALSE);
+        QuestionChoice choice = choiceToCrete.withId(choiceId);
+        choice = choice.withQuestionId(questionId);
+        if (choice.isAnswer() == null) {
+            choice = choice.withIsAnswer(Boolean.FALSE);
         }
         this.questionChoiceStore.insert().values(choice)
                 .execute();
 
         if (locale != null) {
-            choice.setId(choiceId);
+            choice = choice.withId(choiceId);
             createLocalizedChoice(locale, choice);
         }
 
@@ -295,11 +289,7 @@ public class QuestionService {
             final UUID matchId
     ) throws SQLException {
 
-        Matches matches = new Matches();
-
-        matches.setQuestionId(questionId);
-        matches.setChoiceId(choiceId);
-        matches.setMatchId(matchId);
+        Matches matches = new Matches(questionId, choiceId, matchId);
         this.matchesStore.insert().values(matches)
                 .execute();
 
@@ -311,11 +301,8 @@ public class QuestionService {
                                        final QuestionChoice choice)
             throws SQLException {
         QuestionChoiceLocalized questionChoiceLocalized
-                = new QuestionChoiceLocalized();
-
-        questionChoiceLocalized.setChoiceId(choice.getId());
-        questionChoiceLocalized.setLocale(locale.getLanguage());
-        questionChoiceLocalized.setCValue(choice.getCValue());
+                = new QuestionChoiceLocalized(
+                        choice.id(), locale.getLanguage(), choice.cValue());
 
         this.questionChoiceLocalizedStore
                 .insert()
@@ -329,9 +316,9 @@ public class QuestionService {
         int updatedRows = this.questionChoiceLocalizedStore
                 .update()
                 .set(QuestionChoiceLocalizedStore
-                        .cValue(choice.getCValue()))
+                        .cValue(choice.cValue()))
                 .where(QuestionChoiceLocalizedStore
-                        .choiceId().eq(choice.getId())
+                        .choiceId().eq(choice.id())
                         .and(QuestionChoiceLocalizedStore
                                 .locale().eq(locale.getLanguage())))
                 .execute();
@@ -359,8 +346,8 @@ public class QuestionService {
 
         if (matches != null) {
             for (Matches match : matches) {
-                createdMatches.add(createMatch(match.getQuestionId(),
-                        match.getChoiceId(), match.getMatchId()));
+                createdMatches.add(createMatch(match.questionId(),
+                        match.choiceId(), match.matchId()));
             }
         }
         return createdMatches;
@@ -382,12 +369,16 @@ public class QuestionService {
             throws SQLException {
         if (locale == null) {
             List<QuestionChoice> choices = this.questionChoiceStore
-                    .select(QuestionChoiceStore.questionId().eq(questionId))
+                    .select()
+                    .where(QuestionChoiceStore.questionId().eq(questionId))
                     .execute();
 
             if (!isOwner) {
-                choices.forEach(choice
-                        -> choice.setIsAnswer(null));
+
+                for (int i = 0; i < choices.size(); i++) {
+                    choices.set(i, choices.get(i).withIsAnswer(null));
+                }
+
             }
             return choices;
         } else {
@@ -494,42 +485,50 @@ public class QuestionService {
                     question.getId(), locale);
             // Match Pairs are available
             List<Matches>  matchePairs =
-                    this.matchesStore.select(questionId().eq(question
-                            .getId())).execute();
+                    this.matchesStore.select()
+                            .where(questionId().eq(question
+                                    .getId()))
+                            .execute();
 
 
             List<QuestionChoice> choices = new ArrayList<>();
             List<QuestionChoice> matches = new ArrayList<>();
 
             matchePairs.stream().filter(matchPair ->
-                    matchPair.getChoiceId() != null).forEach(matchPair -> {
+                    matchPair.choiceId() != null).forEach(matchPair -> {
                 choices.add(allChoices.stream()
-                        .filter(choice -> choice.getId()
-                                .equals(matchPair.getChoiceId()))
+                        .filter(choice -> choice.id()
+                                .equals(matchPair.choiceId()))
                         .findFirst()
                         .get());
 
                 matches.add(allChoices.stream()
-                        .filter(chice -> chice.getId()
-                                .equals(matchPair.getMatchId()))
+                        .filter(chice -> chice.id()
+                                .equals(matchPair.matchId()))
                         .findFirst().get());
 
 
             });
 
             matchePairs.stream().filter(matchPair
-                    -> matchPair.getChoiceId() == null)
+                    -> matchPair.choiceId() == null)
                     .forEach(matchPair -> {
-                matches.add(allChoices.stream()
-                        .filter(chice -> chice.getId()
-                                .equals(matchPair.getMatchId()))
-                        .findFirst().get());
+
+                        Optional<QuestionChoice> questionChoice
+                                = allChoices.stream()
+                                .filter(chice -> chice.id()
+                                        .equals(matchPair.matchId()))
+                                .findFirst();
+                        questionChoice.ifPresent(matches::add);
+
             });
 
-            question.setChoices(choices);
+
             question.setMatches(matches);
 
-
+            question.setChoices(allChoices.stream()
+                    .filter(questionChoice -> !matches.contains(questionChoice))
+                    .collect(Collectors.toList()));
 
 
         }
@@ -606,14 +605,14 @@ public class QuestionService {
                     && question.getChoices() != null) {
                 List<UUID> availableIds = question.getChoices()
                         .stream()
-                        .filter(choice -> choice.getId() != null)
-                        .map(QuestionChoice::getId)
+                        .filter(choice -> choice.id() != null)
+                        .map(QuestionChoice::id)
                         .collect(Collectors.toList());
                 if (QuestionType.MATCH_THE_FOLLOWING.equals(type)) {
                     availableIds.addAll(question.getMatches()
                             .stream()
-                            .filter(choice -> choice.getId() != null)
-                            .map(QuestionChoice::getId)
+                            .filter(choice -> choice.id() != null)
+                            .map(QuestionChoice::id)
                             .toList());
                 }
                 if (!availableIds.isEmpty()) {
@@ -657,7 +656,7 @@ public class QuestionService {
                             .execute();
                 }
                 for (QuestionChoice choice : question.getChoices()) {
-                    if (choice.getId() == null) {
+                    if (choice.id() == null) {
                         createChoice(choice, locale, id);
                     } else {
                         updateChoice(choice, locale);
@@ -667,20 +666,20 @@ public class QuestionService {
                         && question.getMatches() != null) {
                     int i = 0;
                     for (QuestionChoice matchChoice : question.getMatches()) {
-                        if (matchChoice.getId() == null) {
-                            createChoice(matchChoice, locale, id);
+                        if (matchChoice.id() == null) {
+                            matchChoice = createChoice(matchChoice, locale, id);
                             UUID choiceId = null;
                             if (i < question.getChoices().size()) {
-                                choiceId = question.getChoices().get(i).getId();
+                                choiceId = question.getChoices().get(i).id();
                             }
-                            createMatch(id, choiceId, matchChoice.getId());
+                            createMatch(id, choiceId, matchChoice.id());
                         } else {
                             updateChoice(matchChoice, locale);
                             UUID choiceId = null;
                             if (i < question.getChoices().size()) {
-                                choiceId = question.getChoices().get(i).getId();
+                                choiceId = question.getChoices().get(i).id();
                             }
-                            updateMatch(id, choiceId, matchChoice.getId());
+                            updateMatch(id, choiceId, matchChoice.id());
                         }
                         i++;
                     }
@@ -707,14 +706,14 @@ public class QuestionService {
         if (locale == null) {
             this.questionChoiceStore
                 .update()
-                .set(QuestionChoiceStore.cValue(choice.getCValue()),
-                        QuestionChoiceStore.isAnswer(choice.getIsAnswer()))
-                .where(QuestionChoiceStore.id().eq(choice.getId())).execute();
+                .set(QuestionChoiceStore.cValue(choice.cValue()),
+                        QuestionChoiceStore.isAnswer(choice.isAnswer()))
+                .where(QuestionChoiceStore.id().eq(choice.id())).execute();
         } else {
             this.questionChoiceStore
                 .update()
-                .set(QuestionChoiceStore.isAnswer(choice.getIsAnswer()))
-                .where(QuestionChoiceStore.id().eq(choice.getId()))
+                .set(QuestionChoiceStore.isAnswer(choice.isAnswer()))
+                .where(QuestionChoiceStore.id().eq(choice.id()))
                     .execute();
             saveLocalizedChoice(locale, choice);
         }
@@ -936,8 +935,8 @@ public class QuestionService {
                             constraintDescriptor, elementType);
                     violations.add(violation);
                 } else if (choices.stream()
-                        .filter(choice -> choice.getIsAnswer() != null
-                                && choice.getIsAnswer())
+                        .filter(choice -> choice.isAnswer() != null
+                                && choice.isAnswer())
                         .findFirst().isEmpty()) {
                     ConstraintViolation<Question> violation
                             = ConstraintViolationImpl.forBeanValidation(
@@ -1010,13 +1009,10 @@ public class QuestionService {
                                      final String categoryId)
             throws SQLException {
 
-
-
         int noOfRowsInserted = 0;
 
-        QuestionCategory questionCategory = new QuestionCategory();
-        questionCategory.setQuestionId(questionId);
-        questionCategory.setCategoryId(categoryId);
+        QuestionCategory questionCategory =
+                new QuestionCategory(questionId, categoryId);
 
         noOfRowsInserted = this.questionCategoryStore
                 .insert()

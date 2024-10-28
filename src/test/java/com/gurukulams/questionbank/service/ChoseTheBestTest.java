@@ -32,7 +32,8 @@ class ChoseTheBestTest extends QuestionServiceTest {
 
         QuestionChoice questionChoice = questionToUpdate.getChoices().get(0);
 
-        questionChoice.setCValue(updatedQuestionTxt);
+        UUID cId = questionChoice.id();
+        questionToUpdate.getChoices().set(0,questionChoice.withCValue(updatedQuestionTxt));
 
         this.questionService.update(questionToUpdate.getType(),
                 questionToUpdate.getId(),locale, questionToUpdate);
@@ -40,15 +41,14 @@ class ChoseTheBestTest extends QuestionServiceTest {
         Assertions.assertEquals(updatedQuestionTxt,
                 this.questionService.read(questionToUpdate.getId(),locale).get()
                     .getChoices().stream()
-                    .filter(questionChoice1 -> questionChoice1.getId().equals(questionChoice.getId()))
-                    .findFirst().get().getCValue());
+                    .filter(questionChoice1 -> questionChoice1.id().equals(cId))
+                    .findFirst().get().cValue());
 
         int existingQuestions = questionToUpdate.getChoices().size();
 
         String cValue = UUID.randomUUID().toString();
-        QuestionChoice choice = new QuestionChoice();
-        choice.setIsAnswer(Boolean.FALSE);
-        choice.setCValue(cValue);
+        QuestionChoice choice = new QuestionChoice(null,null,cValue,Boolean.FALSE);
+
         questionToUpdate.getChoices().add(choice);
 
         this.questionService.update(questionToUpdate.getType(),
@@ -56,16 +56,16 @@ class ChoseTheBestTest extends QuestionServiceTest {
 
         QuestionChoice choiceReturned = this.questionService.read(questionToUpdate.getId(),locale).get()
                 .getChoices().stream()
-                .filter(questionChoice1 -> questionChoice1.getCValue().equals(cValue))
+                .filter(questionChoice1 -> questionChoice1.cValue().equals(cValue))
                         .findFirst().get();
 
         Assertions.assertTrue(
-                choiceReturned.getCValue().equals(cValue));
+                choiceReturned.cValue().equals(cValue));
 
         questionToUpdate.setChoices(this.questionService.read(questionToUpdate.getId(),locale)
                 .get()
                 .getChoices().stream()
-                .filter(questionChoice1 -> !questionChoice1.getCValue().equals(cValue)).toList());
+                .filter(questionChoice1 -> !questionChoice1.cValue().equals(cValue)).toList());
 
         this.questionService.update(questionToUpdate.getType(),
                 questionToUpdate.getId(),locale, questionToUpdate);
@@ -80,10 +80,10 @@ class ChoseTheBestTest extends QuestionServiceTest {
     @Override
     String getCorrectAnswer(Question question) {
         return question.getChoices().stream()
-                .filter(QuestionChoice::getIsAnswer)
+                .filter(QuestionChoice::isAnswer)
                 .findFirst()
                 .get()
-                .getId().toString();
+                .id().toString();
     }
 
     @Override
@@ -103,21 +103,16 @@ class ChoseTheBestTest extends QuestionServiceTest {
 
         question.setChoices(new ArrayList<>());
 
-        QuestionChoice choice = new QuestionChoice();
-        choice.setCValue("Java");
-        choice.setIsAnswer(true);
+        QuestionChoice choice = new QuestionChoice(null, null, "Java", true);
         question.getChoices().add(choice);
 
-        choice = new QuestionChoice();
-        choice.setCValue(C_LANGUAGE);
+        choice = new QuestionChoice(null, null,C_LANGUAGE, false);
         question.getChoices().add(choice);
 
-        choice = new QuestionChoice();
-        choice.setCValue("Tamil");
+        choice = new QuestionChoice(null, null,"Tamil", false);
         question.getChoices().add(choice);
 
-        choice = new QuestionChoice();
-        choice.setCValue("English");
+        choice = new QuestionChoice(null, null,"English", false);
         question.getChoices().add(choice);
 
         return question;
@@ -131,7 +126,10 @@ class ChoseTheBestTest extends QuestionServiceTest {
         Question question = getTestQuestion();
 
         // Question without Answer
-        question.getChoices().forEach(questionChoice -> questionChoice.setIsAnswer(false));
+        for (int i = 0; i < question.getChoices().size(); i++) {
+            question.getChoices().set(i, question.getChoices().get(i).withIsAnswer(false));
+        }
+
 
         invalidQuestions.add(question);
 

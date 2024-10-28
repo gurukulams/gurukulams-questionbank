@@ -213,7 +213,7 @@ public class QuestionService {
                                 final UUID id)
             throws SQLException {
         QuestionLocalized questionLocalized = new QuestionLocalized(id,
-                locale.getLanguage(), 
+                locale.getLanguage(),
                 question.getQuestion(),
                 question.getExplanation());
 
@@ -226,7 +226,8 @@ public class QuestionService {
     private com.gurukulams.questionbank.model.Question
     getQuestionModel(final String createdBy, final Question question) {
         com.gurukulams.questionbank.model.Question questionModel
-                = new com.gurukulams.questionbank.model.Question(question.getId(),
+                = new com.gurukulams.questionbank.model.Question(
+                question.getId(),
                 question.getQuestion(),
                 question.getExplanation(),
                 question.getType().name(),
@@ -236,7 +237,7 @@ public class QuestionService {
                 null,
                 null
                 );
-        
+
         return questionModel;
     }
 
@@ -300,7 +301,8 @@ public class QuestionService {
                                        final QuestionChoice choice)
             throws SQLException {
         QuestionChoiceLocalized questionChoiceLocalized
-                = new QuestionChoiceLocalized(choice.id(),locale.getLanguage(),choice.cValue());
+                = new QuestionChoiceLocalized(
+                        choice.id(), locale.getLanguage(), choice.cValue());
 
         this.questionChoiceLocalizedStore
                 .insert()
@@ -511,16 +513,22 @@ public class QuestionService {
             matchePairs.stream().filter(matchPair
                     -> matchPair.choiceId() == null)
                     .forEach(matchPair -> {
-                matches.add(allChoices.stream()
-                        .filter(chice -> chice.id()
-                                .equals(matchPair.matchId()))
-                        .findFirst().get());
+
+                        Optional<QuestionChoice> questionChoice
+                                = allChoices.stream()
+                                .filter(chice -> chice.id()
+                                        .equals(matchPair.matchId()))
+                                .findFirst();
+                        questionChoice.ifPresent(matches::add);
+
             });
 
-            question.setChoices(choices);
+
             question.setMatches(matches);
 
-
+            question.setChoices(allChoices.stream()
+                    .filter(questionChoice -> !matches.contains(questionChoice))
+                    .collect(Collectors.toList()));
 
 
         }
@@ -1001,11 +1009,10 @@ public class QuestionService {
                                      final String categoryId)
             throws SQLException {
 
-
-
         int noOfRowsInserted = 0;
 
-        QuestionCategory questionCategory = new QuestionCategory(questionId,categoryId);
+        QuestionCategory questionCategory =
+                new QuestionCategory(questionId, categoryId);
 
         noOfRowsInserted = this.questionCategoryStore
                 .insert()

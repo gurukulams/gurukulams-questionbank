@@ -30,7 +30,8 @@ abstract class QuestionServiceTest {
                 .getValidator();
         this.questionService = new QuestionService(
                 validator,
-                TestUtil.questionBankManager());
+                TestUtil.questionBankManager(),
+                TestUtil.getDataSource());
         this.answerService = new AnswerService(this.questionService);
     }
 

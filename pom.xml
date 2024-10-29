@@ -4,7 +4,7 @@
 	<name>Gurukulams Question Bank</name>
 	<description>Gurukulams Question Bank Services</description>
 	<groupId>com.gurukulams</groupId>
-	<artifactId>questionbank</artifactId>
+	<artifactId>questions-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<modelVersion>4.0.0</modelVersion>
 
@@ -37,7 +37,7 @@
 		<repository>
 			<id>github</id>
 			<name>GitHub Packages</name>
-			<url>https://maven.pkg.github.com/gurukulams/gurukulams-questionbank</url>
+			<url>https://maven.pkg.github.com/gurukulams</url>
 		</repository>
 	</distributionManagement>
 

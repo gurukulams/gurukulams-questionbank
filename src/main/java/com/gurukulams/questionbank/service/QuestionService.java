@@ -23,6 +23,7 @@ import jakarta.validation.Validator;
 import jakarta.validation.metadata.ConstraintDescriptor;
 import org.hibernate.validator.internal.engine.ConstraintViolationImpl;
 
+import javax.sql.DataSource;
 import java.lang.annotation.ElementType;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -53,6 +54,11 @@ public class QuestionService {
      * Validator.
      */
     private final Validator validator;
+
+    /**
+     * Datasource for persistence.
+     */
+    private final DataSource dataSource;
 
     /**
      * QuestionStore.
@@ -96,24 +102,27 @@ public class QuestionService {
      * initializes.
      *
      * @param aValidator        thevalidator
-     * @param gurukulamsManager
+     * @param theDataSource
+     * @param dataManager
      */
     public QuestionService(final Validator aValidator,
-                           final DataManager gurukulamsManager) {
+                           final DataManager dataManager,
+                           final DataSource theDataSource) {
         this.validator = aValidator;
-        this.questionStore = gurukulamsManager
+        this.dataSource = theDataSource;
+        this.questionStore = dataManager
                 .getQuestionStore();
-        this.questionLocalizedStore = gurukulamsManager
+        this.questionLocalizedStore = dataManager
                 .getQuestionLocalizedStore();
-        this.questionChoiceStore = gurukulamsManager
+        this.questionChoiceStore = dataManager
                 .getQuestionChoiceStore();
-        this.questionChoiceLocalizedStore = gurukulamsManager
+        this.questionChoiceLocalizedStore = dataManager
                 .getQuestionChoiceLocalizedStore();
-        this.questionCategoryStore = gurukulamsManager
+        this.questionCategoryStore = dataManager
                 .getQuestionCategoryStore();
-        this.questionTagStore = gurukulamsManager
+        this.questionTagStore = dataManager
                 .getQuestionTagStore();
-        this.matchesStore = gurukulamsManager.getMatchesStore();
+        this.matchesStore = dataManager.getMatchesStore();
     }
 
     /**
@@ -147,7 +156,7 @@ public class QuestionService {
             this.questionStore
                     .insert()
                     .values(getQuestionModel(createdBy, question))
-                    .execute();
+                    .execute(this.dataSource);
             if (locale != null) {
 
                 createLocalized(locale, question, id);
@@ -220,7 +229,7 @@ public class QuestionService {
         return this.questionLocalizedStore
                 .insert()
                 .values(questionLocalized)
-                .execute();
+                .execute(this.dataSource);
     }
 
     private com.gurukulams.questionbank.model.Question
@@ -273,7 +282,7 @@ public class QuestionService {
             choice = choice.withIsAnswer(Boolean.FALSE);
         }
         this.questionChoiceStore.insert().values(choice)
-                .execute();
+                .execute(this.dataSource);
 
         if (locale != null) {
             choice = choice.withId(choiceId);
@@ -291,7 +300,7 @@ public class QuestionService {
 
         Matches matches = new Matches(questionId, choiceId, matchId);
         this.matchesStore.insert().values(matches)
-                .execute();
+                .execute(this.dataSource);
 
         return matches;
     }
@@ -306,7 +315,7 @@ public class QuestionService {
 
         this.questionChoiceLocalizedStore
                 .insert()
-                .values(questionChoiceLocalized).execute();
+                .values(questionChoiceLocalized).execute(this.dataSource);
     }
 
     private void saveLocalizedChoice(final Locale locale,
@@ -321,7 +330,7 @@ public class QuestionService {
                         .choiceId().eq(choice.id())
                         .and(QuestionChoiceLocalizedStore
                                 .locale().eq(locale.getLanguage())))
-                .execute();
+                .execute(this.dataSource);
         if (updatedRows == 0) {
             createLocalizedChoice(locale, choice);
         }
@@ -371,7 +380,7 @@ public class QuestionService {
             List<QuestionChoice> choices = this.questionChoiceStore
                     .select()
                     .where(QuestionChoiceStore.questionId().eq(questionId))
-                    .execute();
+                    .execute(this.dataSource);
 
             if (!isOwner) {
 
@@ -409,7 +418,7 @@ public class QuestionService {
                             .locale(locale.getLanguage()))
                     .param(QuestionChoiceLocalizedStore
                             .locale(locale.getLanguage()))
-                    .list();
+                    .list(this.dataSource);
 
         }
     }
@@ -427,7 +436,7 @@ public class QuestionService {
         Optional<com.gurukulams.questionbank.model.Question> qm;
 
         if (locale == null) {
-            qm = this.questionStore.select(id);
+            qm = this.questionStore.select(dataSource, id);
         } else {
             final String query = """
                 SELECT id,
@@ -455,7 +464,7 @@ public class QuestionService {
                     .param(QuestionStore.id(id))
                     .param(QuestionLocalizedStore.locale(locale.getLanguage()))
                     .param(QuestionLocalizedStore.locale(locale.getLanguage()))
-                    .optional();
+                    .optional(this.dataSource);
 
         }
 
@@ -488,7 +497,7 @@ public class QuestionService {
                     this.matchesStore.select()
                             .where(questionId().eq(question
                                     .getId()))
-                            .execute();
+                            .execute(this.dataSource);
 
 
             List<QuestionChoice> choices = new ArrayList<>();
@@ -562,7 +571,7 @@ public class QuestionService {
                         QuestionStore.modifiedAt(LocalDateTime.now()))
                         .where(QuestionStore.id().eq(id)
                                 .and().type().eq(type.toString()))
-                        .execute();
+                        .execute(this.dataSource);
             } else {
                 updatedRows = this.questionStore
                         .update()
@@ -570,7 +579,7 @@ public class QuestionService {
                                 QuestionStore.modifiedAt(LocalDateTime.now()))
                         .where(QuestionStore.id().eq(id)
                                 .and().type().eq(type.toString()))
-                        .execute();
+                        .execute(this.dataSource);
             }
             if (locale != null) {
                 final String localizedUpdateQuery = """
@@ -594,7 +603,7 @@ public class QuestionService {
                             .questionId(id))
                     .param(QuestionLocalizedStore.locale(locale.getLanguage()))
                     .param(QuestionStore.type(type.toString()))
-                    .execute();
+                    .execute(this.dataSource);
                 if (updatedRows == 0) {
                     updatedRows = createLocalized(locale, question, id);
                 }
@@ -635,7 +644,7 @@ public class QuestionService {
                                 .param(QuestionChoiceStore.id(cId));
                     }
                     deleteChoiceLocalizedQuery
-                            .execute();
+                            .execute(this.dataSource);
                     final String deleteChoiceSQL =
                             "DELETE FROM question_choice "
                                     + "WHERE question_id = ? AND id NOT IN ("
@@ -653,7 +662,7 @@ public class QuestionService {
                         deleteChoiceQuery.param(QuestionChoiceStore.id(cId));
                     }
                     deleteChoiceQuery
-                            .execute();
+                            .execute(this.dataSource);
                 }
                 for (QuestionChoice choice : question.getChoices()) {
                     if (choice.id() == null) {
@@ -697,7 +706,7 @@ public class QuestionService {
         this.matchesStore.update().set(MatchesStore.matchId(matchId),
                 MatchesStore.choiceId(choiceId))
                 .where(MatchesStore.questionId().eq(questionId)
-                        .and().matchId().eq(matchId)).execute();
+                        .and().matchId().eq(matchId)).execute(this.dataSource);
     }
 
     private void updateChoice(final QuestionChoice choice,
@@ -708,13 +717,14 @@ public class QuestionService {
                 .update()
                 .set(QuestionChoiceStore.cValue(choice.cValue()),
                         QuestionChoiceStore.isAnswer(choice.isAnswer()))
-                .where(QuestionChoiceStore.id().eq(choice.id())).execute();
+                .where(QuestionChoiceStore.id().eq(choice.id()))
+                    .execute(this.dataSource);
         } else {
             this.questionChoiceStore
                 .update()
                 .set(QuestionChoiceStore.isAnswer(choice.isAnswer()))
                 .where(QuestionChoiceStore.id().eq(choice.id()))
-                    .execute();
+                    .execute(this.dataSource);
             saveLocalizedChoice(locale, choice);
         }
     }
@@ -732,15 +742,16 @@ public class QuestionService {
                         DELETE FROM question_choice_localized
                         WHERE choice_id IN
                         (SELECT id FROM question_choice WHERE question_id = ?)
-                                """;
+                        """;
         this.questionChoiceLocalizedStore
                 .delete()
                 .sql(queryL)
-                .param(QuestionChoiceStore.questionId(questionId)).execute();
+                .param(QuestionChoiceStore.questionId(questionId))
+                .execute(this.dataSource);
 
         this.questionChoiceStore
                 .delete(QuestionChoiceStore.questionId().eq(questionId))
-                .execute();
+                .execute(this.dataSource);
     }
 
     /**
@@ -754,7 +765,7 @@ public class QuestionService {
 
         this.matchesStore
                 .delete(MatchesStore.questionId().eq(questionId))
-                .execute();
+                .execute(this.dataSource);
     }
 
     /**
@@ -794,7 +805,7 @@ public class QuestionService {
             }
 
             qms = queryBuilder
-                    .list();
+                    .list(this.dataSource);
         } else {
             query = "SELECT id,"
                     + "CASE WHEN ql.LOCALE = ? "
@@ -834,7 +845,7 @@ public class QuestionService {
             qms = queryBuilder
                     .param(QuestionLocalizedStore.locale(locale.getLanguage()))
                     .param(QuestionLocalizedStore.locale(locale.getLanguage()))
-                    .list();
+                    .list(this.dataSource);
 
         }
 
@@ -983,16 +994,16 @@ public class QuestionService {
 
         this.questionLocalizedStore
                 .delete(QuestionLocalizedStore.questionId().eq(questionId))
-                .execute();
+                .execute(this.dataSource);
 
         this.questionCategoryStore
                 .delete(QuestionCategoryStore.questionId().eq(questionId))
-                .execute();
+                .execute(this.dataSource);
 
         this.questionStore
                 .delete(QuestionStore.id().eq(questionId)
                         .and().type().eq(questionType.toString()))
-                .execute();
+                .execute(this.dataSource);
     }
 
 
@@ -1017,7 +1028,7 @@ public class QuestionService {
         noOfRowsInserted = this.questionCategoryStore
                 .insert()
                 .values(questionCategory)
-                .execute();
+                .execute(this.dataSource);
 
         return noOfRowsInserted == 1;
     }
@@ -1026,14 +1037,14 @@ public class QuestionService {
      * Deletes Questions.
      */
     public void delete() throws SQLException {
-        this.matchesStore.delete().execute();
-        this.questionCategoryStore.delete().execute();
-        this.questionTagStore.delete().execute();
+        this.matchesStore.delete().execute(this.dataSource);
+        this.questionCategoryStore.delete().execute(this.dataSource);
+        this.questionTagStore.delete().execute(this.dataSource);
 
-        this.questionChoiceLocalizedStore.delete().execute();
-        this.questionChoiceStore.delete().execute();
+        this.questionChoiceLocalizedStore.delete().execute(this.dataSource);
+        this.questionChoiceStore.delete().execute(this.dataSource);
 
-        this.questionLocalizedStore.delete().execute();
-        this.questionStore.delete().execute();
+        this.questionLocalizedStore.delete().execute(this.dataSource);
+        this.questionStore.delete().execute(this.dataSource);
     }
 }

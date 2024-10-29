@@ -37,7 +37,7 @@
 		<repository>
 			<id>github</id>
 			<name>GitHub Packages</name>
-			<url>https://maven.pkg.github.com/techatpark/gurukulams-questionbank</url>
+			<url>https://maven.pkg.github.com/gurukulams/gurukulams-questionbank</url>
 		</repository>
 	</distributionManagement>
 

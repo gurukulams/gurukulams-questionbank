@@ -234,8 +234,7 @@ public class QuestionService {
 
     private com.gurukulams.questionbank.model.Question
     getQuestionModel(final String createdBy, final Question question) {
-        com.gurukulams.questionbank.model.Question questionModel
-                = new com.gurukulams.questionbank.model.Question(
+        return new com.gurukulams.questionbank.model.Question(
                 question.getId(),
                 question.getQuestion(),
                 question.getExplanation(),
@@ -245,9 +244,7 @@ public class QuestionService {
                 createdBy,
                 null,
                 null
-                );
-
-        return questionModel;
+        );
     }
 
     private Question
@@ -384,9 +381,9 @@ public class QuestionService {
 
             if (!isOwner) {
 
-                for (int i = 0; i < choices.size(); i++) {
-                    choices.set(i, choices.get(i).withIsAnswer(null));
-                }
+                choices
+                        .replaceAll(questionChoice
+                                -> questionChoice.withIsAnswer(null));
 
             }
             return choices;
@@ -538,7 +535,6 @@ public class QuestionService {
             question.setChoices(allChoices.stream()
                     .filter(questionChoice -> !matches.contains(questionChoice))
                     .collect(Collectors.toList()));
-
 
         }
     }
@@ -1020,7 +1016,7 @@ public class QuestionService {
                                      final String categoryId)
             throws SQLException {
 
-        int noOfRowsInserted = 0;
+        int noOfRowsInserted;
 
         QuestionCategory questionCategory =
                 new QuestionCategory(questionId, categoryId);

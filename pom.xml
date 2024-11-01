@@ -63,14 +63,13 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/jakarta.el/jakarta.el-api -->
 		<dependency>
 			<groupId>jakarta.el</groupId>
 			<artifactId>jakarta.el-api</artifactId>
 			<version>${jakarta.el-api.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.glassfish/jakarta.el -->
+
 		<dependency>
 			<groupId>org.glassfish</groupId>
 			<artifactId>jakarta.el</artifactId>
@@ -99,7 +98,6 @@
 			<version>${postgresql.version}</version>
 		</dependency>
 
-		<!-- https://mvnrepository.com/artifact/com.h2database/h2 -->
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
@@ -162,7 +160,6 @@
 				</dependencies>
 				<configuration>
 					<excludes>**/module-info.java</excludes>
-					<encoding>UTF-8</encoding>
 					<consoleOutput>true</consoleOutput>
 					<failsOnError>true</failsOnError>
 					<linkXRef>false</linkXRef>
@@ -177,7 +174,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!--JaCoCo Maven Plugin-->
+
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
@@ -220,7 +217,7 @@
 										<limit>
 											<counter>LINE</counter>
 											<value>COVEREDRATIO</value>
-											<minimum>0.6</minimum>
+											<minimum>0.9</minimum>
 										</limit>
 									</limits>
 								</rule>
